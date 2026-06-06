@@ -1,0 +1,2150 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trung tâm Hỗ trợ Kỹ thuật & Xử lý sự cố - Visnam</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7', // Sky Blue
+                            600: '#025a94',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        visnam: {
+                            primary: '#0D5392', // Màu chủ đạo Visnam
+                            secondary: '#00A3E0', // Màu phụ xanh ngọc
+                            accent: '#F25F22' // Màu cam nhấn mạnh
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Be Vietnam Pro', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons for high-quality SVG icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- PDF.js CDN Library - Giải pháp triệt để xử lý hiển thị PDF native dạng A4 sạch đẹp -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <style>
+        /* Tối ưu hóa thanh cuộn để tránh nhảy bố cục khi mở/đóng modal */
+        html {
+            scrollbar-gutter: stable;
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+        
+        /* Tối ưu thanh cuộn tùy chỉnh */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Hiệu ứng chuyển cảnh mịn màng */
+        .fade-transition {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Con trỏ cầm nắm tài liệu hỗ trợ kéo thả */
+        .grab-scroll {
+            cursor: grab;
+        }
+        .grab-scroll:active {
+            cursor: grabbing;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white !important;
+                color: black !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-brand-100 selection:text-brand-900 overflow-x-hidden font-sans">
+
+    <!-- TOP COMPACT HEADER BAR -->
+    <header class="bg-white/95 border-b border-slate-100 sticky top-0 z-40 shadow-sm backdrop-blur-md shrink-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-12 md:h-14">
+                <!-- LOGO & BRAND (Favicon Styled block) -->
+                <div class="flex items-center space-x-2.5 cursor-pointer" onclick="goHome()">
+                    <div class="w-8 h-8 md:w-9 md:h-9 bg-gradient-to-tr from-visnam-primary to-visnam-secondary rounded-lg flex items-center justify-center text-white font-extrabold text-lg shadow-md transform hover:scale-105 transition duration-200 select-none">
+                        V
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-1">
+                            <span class="text-sm md:text-base font-black tracking-wider text-visnam-primary">VISNAM</span>
+                            <span class="text-[8px] px-1.5 py-0.2 bg-visnam-accent text-white font-bold rounded">SUPPORT</span>
+                        </div>
+                        <p class="text-[8px] text-slate-400 uppercase tracking-widest font-bold">Hệ thống xử lý sự cố</p>
+                    </div>
+                </div>
+
+                <!-- DESKTOP NAVIGATION -->
+                <nav class="hidden md:flex items-center space-x-5">
+                    <button onclick="goHome()" class="text-xs font-extrabold text-slate-700 hover:text-visnam-primary transition flex items-center space-x-1.5 py-1.5 px-3 rounded-lg hover:bg-slate-50">
+                        <i data-lucide="home" class="w-3.5 h-3.5"></i>
+                        <span>Trang chủ</span>
+                    </button>
+                    
+                    <span class="h-4 w-px bg-slate-200"></span>
+
+                    <!-- Admin Auth Buttons -->
+                    <div id="auth-controls" class="flex items-center space-x-2">
+                        <!-- Guest Admin Mode Toggle -->
+                        <button onclick="openLoginModal()" id="btn-admin-login" class="flex items-center space-x-1.5 text-xs font-bold text-slate-600 hover:text-visnam-primary transition bg-slate-100 hover:bg-slate-200 px-3.5 py-1.5 rounded-lg">
+                            <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+                            <span>Admin Đăng nhập</span>
+                        </button>
+
+                        <div id="admin-active-group" class="hidden flex items-center space-x-2">
+                            <button onclick="toggleViewMode()" id="btn-toggle-view" class="flex items-center space-x-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition px-3.5 py-1.5 rounded-lg shadow-sm">
+                                <i data-lucide="layout-dashboard" class="w-3.5 h-3.5" id="view-toggle-icon"></i>
+                                <span id="view-toggle-text">Trang quản trị</span>
+                            </button>
+                            <button onclick="logoutAdmin()" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition" title="Đăng xuất">
+                                <i data-lucide="log-out" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- MOBILE MENU BUTTON -->
+                <div class="md:hidden flex items-center space-x-2">
+                    <button onclick="toggleMobileMenu()" class="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg">
+                        <i data-lucide="menu" class="w-5 h-5" id="menu-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Panel -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 px-4 pt-1 pb-3 space-y-1 shadow-inner">
+            <button onclick="goHome(); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-100 flex items-center space-x-2">
+                <i data-lucide="home" class="w-4 h-4"></i>
+                <span>Trang chủ</span>
+            </button>
+            <div class="border-t border-slate-100 my-1 pt-1"></div>
+            <div id="mobile-auth-controls" class="space-y-1">
+                <button onclick="toggleMobileMenu(); openLoginModal()" id="btn-mobile-login" class="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-100 flex items-center space-x-2">
+                    <i data-lucide="lock" class="w-4 h-4"></i>
+                    <span>Admin Đăng nhập</span>
+                </button>
+                <div id="mobile-admin-active" class="hidden space-y-1">
+                    <button onclick="toggleMobileMenu(); toggleViewMode()" id="btn-mobile-toggle" class="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 flex items-center space-x-2">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span id="mobile-view-toggle-text">Quản trị viên</span>
+                    </button>
+                    <button onclick="toggleMobileMenu(); logoutAdmin()" class="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-red-600 hover:bg-red-50 flex items-center space-x-2">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                        <span>Đăng xuất hệ thống</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN VIEW CONTAINER -->
+    <div id="view-dispatcher" class="flex-grow flex flex-col justify-between">
+        
+        <!-- CLIENT/GUEST VIEW -->
+        <div id="client-view" class="fade-transition flex-grow flex flex-col justify-between">
+            <!-- COMPACT HERO SEARCH BANNER -->
+            <section class="bg-gradient-to-r from-visnam-primary to-brand-800 text-white py-6 px-4 relative overflow-hidden shrink-0">
+                <div class="absolute inset-0 bg-grid-white/[0.04] bg-[size:16px_16px]"></div>
+                <div class="absolute -top-16 -left-16 w-64 h-64 bg-visnam-secondary rounded-full opacity-10 blur-3xl"></div>
+                <div class="absolute -bottom-16 -right-16 w-64 h-64 bg-visnam-accent rounded-full opacity-10 blur-3xl"></div>
+
+                <div class="max-w-4xl mx-auto text-center relative z-10">
+                    <span class="bg-white/10 text-white text-[10px] px-3 py-0.5 rounded-full font-bold uppercase tracking-wider inline-block mb-2.5 backdrop-blur-sm">Cổng hỗ trợ kỹ thuật trực tuyến</span>
+                    <h1 class="text-xl md:text-2xl font-black mb-2 tracking-tight leading-tight">Chúng tôi có thể giúp gì cho bạn hôm nay?</h1>
+                    
+                    <!-- Required Intro Text -->
+                    <p class="text-slate-200 text-xs md:text-xs mb-4 font-light max-w-3xl mx-auto leading-relaxed">
+                        Visnam đồng hành cùng doanh nghiệp trong hành trình chuyển đổi số bằng hệ sinh thái công nghệ toàn diện và tối ưu. Chúng tôi giúp đơn giản hóa quy trình quản lý, nâng cao hiệu quả vận hành và thúc đẩy tăng trưởng bền vững.
+                    </p>
+                    
+                    <!-- Compact Search Box -->
+                    <div class="relative max-w-xl mx-auto bg-white rounded-xl p-1 shadow-md flex items-center">
+                        <div class="flex items-center pl-3 pr-1 text-slate-400">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                        </div>
+                        <input type="text" id="main-search" oninput="handleSearch(this.value)" placeholder="Nhập tên lỗi, mã lỗi hoặc từ khóa (ví dụ: 'Token', 'Java')...." class="w-full py-1.5 px-1 text-slate-800 focus:outline-none placeholder:text-slate-400 text-xs rounded-lg">
+                        <button onclick="triggerSearch()" class="bg-gradient-to-r from-visnam-primary to-visnam-secondary text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:opacity-90 transition shrink-0 shadow-sm">
+                            <span>Tìm ngay</span>
+                        </button>
+                    </div>
+                    
+                    <p class="mt-2 text-[10px] text-slate-300">
+                        Từ khóa gợi ý: <span class="underline cursor-pointer" onclick="setQuickSearch('Token')">USB Token</span>, <span class="underline cursor-pointer" onclick="setQuickSearch('Java')">Cài đặt Java</span>, <span class="underline cursor-pointer" onclick="setQuickSearch('SMTP')">Gửi nhận Email</span>
+                    </p>
+                </div>
+            </section>
+
+            <!-- MAIN BODY SECTION -->
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 w-full flex-grow">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+                    
+                    <!-- LEFT COLUMN: CATEGORIES & QUICK ACTIONS -->
+                    <aside class="lg:col-span-1 space-y-4">
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-100">
+                            <div class="flex items-center justify-between mb-3 pb-1.5 border-b border-slate-100">
+                                <h2 class="text-xs font-black text-slate-900 flex items-center space-x-1.5">
+                                    <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-visnam-primary"></i>
+                                    <span>DANH MỤC HỖ TRỢ</span>
+                                </h2>
+                            </div>
+                            
+                            <!-- Dynamic Category List -->
+                            <div class="space-y-1" id="category-list">
+                                <!-- Filled by JS -->
+                            </div>
+                        </div>
+
+                        <!-- EMERGENCY QUICK TOOLKIT FOR CLIENTS -->
+                        <div class="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-xl p-4 shadow-md relative overflow-hidden">
+                            <div class="absolute right-0 bottom-0 opacity-10">
+                                <i data-lucide="download" class="w-24 h-24"></i>
+                            </div>
+                            <h3 class="text-xs font-extrabold mb-1 flex items-center space-x-1.5 text-indigo-300">
+                                <i data-lucide="wrench" class="w-3.5 h-3.5"></i>
+                                <span>Bộ công cụ hỗ trợ nhanh</span>
+                            </h3>
+                            <p class="text-[10px] text-slate-400 mb-3 leading-relaxed">Tải phần mềm kết nối từ xa để nhân viên kỹ thuật Visnam xử lý trực tiếp trên máy tính của bạn.</p>
+                            <div class="space-y-2">
+                                <a href="https://www.ultraviewer.net/vi/UltraViewer_setup_6.6_vi.exe" target="_blank" class="w-full bg-white text-indigo-950 text-[10px] font-black py-2 px-3 rounded-lg flex items-center justify-center space-x-1.5 hover:bg-indigo-50 transition shadow">
+                                    <i data-lucide="download-cloud" class="w-3.5 h-3.5"></i>
+                                    <span>Tải Ultraviewer (Bản Gốc)</span>
+                                </a>
+                                <a href="tel:19006134" class="w-full bg-visnam-accent text-white text-[10px] font-black py-2 px-3 rounded-lg flex items-center justify-center space-x-1.5 hover:bg-orange-600 transition shadow">
+                                    <i data-lucide="phone-call" class="w-3.5 h-3.5 animate-pulse"></i>
+                                    <span>Tổng đài: 1900 6134</span>
+                                </a>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- RIGHT COLUMN: DASHBOARD & ARTICLES WITH FIXED PAGINATION (9 ITEMS PER PAGE) -->
+                    <section class="lg:col-span-3 flex flex-col justify-between h-full min-h-[640px]">
+                        <div class="space-y-4">
+                            <!-- Controls / Filtering Metadata -->
+                            <div class="bg-white rounded-xl p-3.5 shadow-sm border border-slate-100 flex flex-wrap justify-between items-center gap-3">
+                                <div>
+                                    <h2 class="text-xs font-black text-slate-900 flex items-center space-x-2">
+                                        <span id="filtered-title">Tất cả tài liệu hỗ trợ</span>
+                                        <span id="filtered-count" class="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-full">0</span>
+                                    </h2>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <label class="text-[10px] text-slate-400 font-bold">Sắp xếp:</label>
+                                    <select onchange="handleSort(this.value)" class="text-[10px] bg-slate-50 border border-slate-200 rounded-lg p-1 font-bold text-slate-700 focus:outline-none focus:border-visnam-primary">
+                                        <option value="newest">Mới nhất</option>
+                                        <option value="popular">Xem nhiều nhất</option>
+                                        <option value="rating">Đánh giá tốt nhất</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Articles Grid with STABLE HEIGHT to prevent layout shifts -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 min-h-[480px]" id="articles-grid">
+                                <!-- Filled by JS (9 articles maximum) -->
+                            </div>
+                        </div>
+
+                        <!-- Compact Pagination stuck perfectly at the bottom of the section -->
+                        <div id="pagination-controls" class="flex justify-center items-center space-x-2 py-2 px-4 bg-white rounded-xl border border-slate-100 shadow-sm mt-4 shrink-0">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+
+                        <!-- Empty State -->
+                        <div id="no-results" class="hidden bg-white rounded-xl p-10 text-center border border-slate-100 shadow-sm min-h-[480px] flex flex-col justify-center items-center">
+                            <div class="w-10 h-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <i data-lucide="search-x" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="text-xs font-bold text-slate-800">Không tìm thấy tài liệu phù hợp</h3>
+                            <p class="text-[10px] text-slate-500 mt-1 max-w-xs mx-auto">Vui lòng thử tìm kiếm bằng các từ khóa ngắn gọn hơn hoặc chọn danh mục khác.</p>
+                            <button onclick="resetFilters()" class="mt-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold px-3 py-1.5 rounded-lg transition">Xóa bộ lọc tìm kiếm</button>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+
+        <!-- NEW SEPARATE ADMIN WORKSPACE VIEW -->
+        <div id="admin-view" class="hidden fade-transition flex-grow flex flex-col justify-between">
+            <div class="flex-grow">
+                <!-- ADMIN HEADER -->
+                <div class="bg-slate-900 text-white py-5 px-4 md:px-6">
+                    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                        <div>
+                            <div class="flex items-center space-x-1.5 text-indigo-400 text-[10px] font-bold tracking-widest uppercase mb-0.5">
+                                <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+                                <span>Bảng điều khiển quản trị hệ thống</span>
+                            </div>
+                            <h1 class="text-lg md:text-xl font-black">Visnam Support Admin Portal</h1>
+                            <p class="text-slate-400 text-[10px]">Cập nhật nhanh quy trình xử lý lỗi và quản lý danh mục hỗ trợ trực tuyến.</p>
+                        </div>
+                        
+                        <button onclick="openArticleModal(null)" class="bg-emerald-600 text-white text-[11px] font-bold px-3 py-2.5 rounded-lg hover:bg-emerald-700 transition shadow-sm flex items-center space-x-1.5">
+                            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                            <span>Đăng tài liệu hỗ trợ mới</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STATS COUNTERS -->
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex items-center space-x-3">
+                            <div class="p-2 bg-brand-50 text-visnam-primary rounded-lg"><i data-lucide="file-text" class="w-4 h-4"></i></div>
+                            <div>
+                                <p class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Tổng tài liệu</p>
+                                <h3 id="stat-total-articles" class="text-sm font-extrabold text-slate-800">0</h3>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex items-center space-x-3">
+                            <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><i data-lucide="folders" class="w-4 h-4"></i></div>
+                            <div>
+                                <p class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Tổng danh mục</p>
+                                <h3 id="stat-total-categories" class="text-sm font-extrabold text-slate-800">0</h3>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex items-center space-x-3">
+                            <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><i data-lucide="eye" class="w-4 h-4"></i></div>
+                            <div>
+                                <p class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Lượt xem tích lũy</p>
+                                <h3 id="stat-total-views" class="text-sm font-extrabold text-slate-800">0</h3>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex items-center space-x-3">
+                            <div class="p-2 bg-amber-50 text-amber-500 rounded-lg"><i data-lucide="star" class="w-4 h-4"></i></div>
+                            <div>
+                                <p class="text-[9px] text-slate-400 uppercase tracking-wider font-bold">Đánh giá TB</p>
+                                <h3 id="stat-avg-rating" class="text-sm font-extrabold text-slate-800">0.0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADMIN WORKSPACE GRID -->
+                <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        
+                        <!-- LEFT SIDE: ARTICLES MANAGEMENT TABLE -->
+                        <section class="lg:col-span-2 space-y-4">
+                            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                                <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-slate-50/50">
+                                    <div class="flex items-center space-x-2">
+                                        <i data-lucide="list-ordered" class="w-4 h-4 text-brand-500"></i>
+                                        <h2 class="text-xs font-black text-slate-900 uppercase tracking-wider">
+                                            <span>Danh sách tài liệu hướng dẫn</span>
+                                        </h2>
+                                        <span id="admin-table-count" class="text-[10px] bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full">0</span>
+                                    </div>
+                                    
+                                    <!-- Admin Fast Search Bar -->
+                                    <div class="relative w-full sm:w-56">
+                                        <input type="text" id="admin-search-input" oninput="handleAdminSearch(this.value)" placeholder="Tìm kiếm nhanh trong bảng..." class="w-full bg-white border border-slate-200 rounded-lg pl-8 pr-2 py-1 text-[11px] focus:outline-none focus:border-indigo-500">
+                                        <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-2 text-slate-400"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Table Container (With custom scrollbar and max height) -->
+                                <div class="overflow-x-auto max-h-[420px] pdf-scrollbar">
+                                    <table class="w-full text-left text-xs relative">
+                                        <thead class="bg-slate-100 text-slate-600 uppercase font-bold tracking-wider sticky top-0 z-10">
+                                            <tr>
+                                                <th class="p-3">Tiêu đề bài viết</th>
+                                                <th class="p-3">Chuyên mục</th>
+                                                <th class="p-3 text-center">Lượt xem</th>
+                                                <th class="p-3 text-center">Đánh giá</th>
+                                                <th class="p-3 text-right">Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="admin-articles-tbody" class="divide-y divide-slate-100 bg-white">
+                                            <!-- Populated dynamically -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- RIGHT SIDE: QUICK CATEGORIES MANAGER -->
+                        <aside class="space-y-4">
+                            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                                <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+                                    <h2 class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center space-x-1.5">
+                                        <i data-lucide="folder-cog" class="w-4 h-4 text-indigo-500"></i>
+                                        <span>Quản lý danh mục trực tiếp</span>
+                                    </h2>
+                                </div>
+
+                                <!-- Form add Category inline -->
+                                <div class="mb-3 bg-indigo-50/50 p-3 rounded-lg border border-indigo-100">
+                                    <label class="block text-[10px] font-bold text-indigo-700 mb-1.5 uppercase tracking-wide">Tạo thêm danh mục mới</label>
+                                    <div class="flex space-x-1.5">
+                                        <input type="text" id="admin-new-category-name" placeholder="Ví dụ: Khai thuế Hải quan..." class="flex-grow bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500">
+                                        <button onclick="addCategoryAdmin()" class="bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition shrink-0 flex items-center space-x-1">
+                                            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                                            <span>Thêm</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Existing list in admin area -->
+                                <div class="space-y-1.5 max-h-64 overflow-y-auto pr-1 pdf-scrollbar" id="admin-category-list">
+                                    <!-- Populated dynamically by JS -->
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FIXED & SECURE STICKY FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 pt-8 pb-6 border-t border-slate-800 shrink-0 w-full mt-auto select-none">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <!-- Company Bio -->
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-8 h-8 bg-gradient-to-tr from-visnam-primary to-visnam-secondary rounded-lg flex items-center justify-center text-white font-black text-lg">
+                            V
+                        </div>
+                        <span class="text-sm font-extrabold text-white tracking-wider">VISNAM COMMERCE</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                        Công ty Cổ phần Thương mại Visnam là đơn vị cung cấp các giải pháp chuyển đổi số hàng đầu: Chữ ký số, Hóa đơn điện tử, Phần mềm kế toán và hỗ trợ nghiệp vụ Thuế toàn diện cho doanh nghiệp.
+                    </p>
+                </div>
+
+                <!-- Contact Details -->
+                <div class="space-y-2">
+                    <h4 class="text-white font-extrabold text-[11px] tracking-wider uppercase border-b border-slate-800 pb-1">THÔNG TIN LIÊN HỆ</h4>
+                    <ul class="space-y-1.5 text-[11px]">
+                        <li class="flex items-start space-x-2">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-visnam-secondary shrink-0 mt-0.5"></i>
+                            <span>33 Hải Hồ, Hải Châu, Đà Nẵng</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i data-lucide="phone" class="w-3.5 h-3.5 text-visnam-secondary shrink-0"></i>
+                            <span>Hỗ trợ kỹ thuật: <strong class="text-white">1900 6134</strong></span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i data-lucide="mail" class="w-3.5 h-3.5 text-visnam-secondary shrink-0"></i>
+                            <!-- Updated Footer Contact Email -->
+                            <span>kinhdoanh@visnam.com</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Support Links & Channel -->
+                <div class="space-y-2">
+                    <h4 class="text-white font-extrabold text-[11px] tracking-wider uppercase border-b border-slate-800 pb-1">LIÊN KẾT NHANH</h4>
+                    <div class="grid grid-cols-2 gap-1 text-[11px]">
+                        <a href="https://visnam.com" target="_blank" class="hover:text-white transition flex items-center space-x-1">
+                            <i data-lucide="arrow-right" class="w-2.5 h-2.5 text-visnam-secondary"></i>
+                            <span>Trang chủ Visnam</span>
+                        </a>
+                        <a href="tel:19006134" class="hover:text-white transition flex items-center space-x-1">
+                            <i data-lucide="arrow-right" class="w-2.5 h-2.5 text-visnam-secondary"></i>
+                            <span>Liên hệ hỗ trợ</span>
+                        </a>
+                    </div>
+                    <div class="pt-1">
+                        <div class="bg-slate-800/60 p-2 rounded-lg border border-slate-800 flex items-center space-x-2">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-visnam-secondary shrink-0"></i>
+                            <p class="text-[9px] text-slate-300">Hệ thống phân phối kỹ thuật bảo mật chuẩn quốc gia.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="border-t border-slate-800 pt-4 flex flex-col md:flex-row justify-between items-center gap-2 text-[10px]">
+                <p>&copy; 2026 CÔNG TY CỔ PHẦN THƯƠNG MẠI VISNAM. Bảo lưu mọi quyền.</p>
+                <div class="flex space-x-3 text-[10px]">
+                    <a href="#" class="hover:text-white transition">Chính sách bảo mật</a>
+                    <span>•</span>
+                    <a href="#" class="hover:text-white transition">Điều khoản dịch vụ</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- MODAL 1: VIEW INSTRUCTION & SIMULATED MULTI-PAGE PDF (ALWAYS ENFORCING UNIFIED A4 STYLE - REMOVED OLD CHECKLIST PAGE) -->
+    <div id="view-article-modal" class="hidden fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-2 sm:p-4">
+        <!-- Backdrop Blur and Dim -->
+        <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm transition-opacity" onclick="closeArticleModal()"></div>
+        
+        <!-- Modal Container (Maximizing height and space) -->
+        <div class="bg-slate-900 rounded-2xl overflow-hidden shadow-2xl relative w-full max-w-7xl h-[95vh] flex flex-col z-10 animate-in fade-in zoom-in-95 duration-200">
+            <!-- Header bar with zoom control tools -->
+            <div class="bg-slate-950 text-white p-3 flex items-center justify-between border-b border-slate-800 shrink-0">
+                <div class="flex items-center space-x-2.5 min-w-0">
+                    <div class="bg-brand-500 text-white p-2 rounded-lg shrink-0 hidden sm:block">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                    </div>
+                    <div class="min-w-0 flex items-center flex-wrap gap-x-2">
+                        <span id="modal-category" class="text-[9px] bg-slate-800 text-visnam-secondary px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">CHỮ KÝ SỐ</span>
+                        <span id="pdf-file-name-bar" class="text-[9px] text-slate-400 font-semibold truncate max-w-[150px] sm:max-w-[250px]">tai-lieu-huong-dan-visnam.pdf</span>
+                        <h4 id="modal-title" class="text-xs md:text-sm font-extrabold mt-0.5 text-slate-100 truncate w-full">Tiêu đề tài liệu hướng dẫn</h4>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-2.5 shrink-0">
+                    <!-- Zoom Controls bar -->
+                    <div class="bg-slate-800 px-2 py-0.5 rounded-lg flex items-center space-x-1.5 text-xs text-slate-300">
+                        <button onclick="zoomOut()" class="p-1 hover:bg-slate-700 rounded text-slate-200" title="Thu nhỏ">
+                            <i data-lucide="zoom-out" class="w-3.5 h-3.5"></i>
+                        </button>
+                        <span id="zoom-percent" class="font-bold w-12 text-center text-[10px]">100%</span>
+                        <button onclick="zoomIn()" class="p-1 hover:bg-slate-700 rounded text-slate-200" title="Phóng to">
+                            <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i>
+                        </button>
+                        <button onclick="resetZoom()" class="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-slate-200" title="Đặt lại zoom">
+                            <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+
+                    <button onclick="printArticle()" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition" title="In tài liệu">
+                        <i data-lucide="printer" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="closeArticleModal()" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Content - Split layout -->
+            <div class="flex-grow flex flex-col lg:flex-row overflow-hidden bg-slate-950">
+                
+                <!-- Left panel: Simulated PDF Viewport (Clean, no checkboxes, support click & drag scroll) -->
+                <div class="flex-grow flex flex-col h-full overflow-hidden relative">
+                    <div id="pdf-viewer-container" class="flex-grow p-6 overflow-auto pdf-scrollbar flex flex-col items-center space-y-6 grab-scroll bg-slate-800">
+                        <!-- Simulated Page Wrapper with dynamic Zoom scaling -->
+                        <div id="pdf-zoom-wrapper" class="origin-top transition-transform duration-150 ease-out flex flex-col items-center space-y-6 w-full max-w-2xl">
+                            
+                            <!-- PAGE 1 (Clean A4 Document Page - Shown when NO actual PDF uploaded) -->
+                            <div id="pdf-page-mock" class="bg-white w-full shadow-2xl rounded-sm p-8 sm:p-12 md:p-14 text-slate-800 relative min-h-[842px] flex flex-col justify-between hidden">
+                                <div>
+                                    <!-- Official Visnam Header Banner -->
+                                    <div class="border-b border-slate-200 pb-3 mb-6 flex justify-between items-start select-none">
+                                        <div>
+                                            <h4 class="text-xs font-black text-visnam-primary tracking-wide">CÔNG TY CỔ PHẦN THƯƠNG MẠI VISNAM</h4>
+                                            <p class="text-[8px] text-slate-400 tracking-wider font-semibold">Trung Tâm Nghiệp Vụ Toàn Quốc - 33 Hải Hồ, Đà Nẵng</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-[8px] px-2 py-0.5 border border-slate-300 text-slate-500 font-mono rounded font-bold">PAGE 1 / 1</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Document Body -->
+                                    <div class="space-y-6">
+                                        <div class="text-center">
+                                            <h2 id="pdf-title" class="text-sm sm:text-base md:text-lg font-black text-slate-900 leading-snug">TIÊU ĐỀ TÀI LIỆU HƯỚNG DẪN</h2>
+                                            <p class="text-[9px] text-slate-400 italic mt-1">Phòng Kỹ Thuật Nghiệp Vụ Visnam ban hành</p>
+                                        </div>
+
+                                        <div class="bg-slate-50 border-l-4 border-visnam-secondary p-3.5 rounded-r-lg">
+                                            <p class="text-[9px] text-slate-500 font-black uppercase tracking-wider mb-1">MÔ TẢ SỰ CỐ:</p>
+                                            <p id="pdf-description" class="text-xs text-slate-600 leading-relaxed font-semibold"></p>
+                                        </div>
+
+                                        <div class="space-y-3">
+                                            <h3 class="text-xs font-black text-slate-900 uppercase border-b border-slate-200 pb-1">CÁC BƯỚC HƯỚNG DẪN CHI TIẾT:</h3>
+                                            <div id="pdf-steps-plain" class="text-xs leading-relaxed text-slate-700 space-y-2 whitespace-pre-line font-medium">
+                                                <!-- Steps styled as clean paragraphs without checkboxes -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Official footer warning space -->
+                                <div class="mt-8 pt-4 border-t border-slate-100 flex justify-between items-center text-[8px] text-slate-400">
+                                    <p>Tổng đài Hỗ trợ Kỹ thuật: 1900 6134</p>
+                                    <div class="text-center shrink-0">
+                                        <p class="text-[10px] font-bold text-slate-700 uppercase">KỸ THUẬT NGHIỆP VỤ VISNAM</p>
+                                        <div class="w-24 h-12 bg-red-50 border border-red-100 text-red-500 text-[9px] flex items-center justify-center font-black rounded transform -rotate-3 mx-auto mt-2">
+                                            VISNAM APPROVED
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- DYNAMIC PDF PAGES CONTAINER (Used when actual PDF is uploaded, rendered via PDF.js as canvases) -->
+                            <div id="pdf-dynamic-pages-container" class="w-full flex flex-col space-y-6 hidden"></div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right panel: Details & Operations -->
+                <div class="w-full lg:w-72 bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 p-5 flex flex-col justify-between shrink-0 overflow-y-auto">
+                    <div class="space-y-5 text-white">
+                        <div>
+                            <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Thông tin tài liệu</h4>
+                            <div class="bg-slate-800 rounded-xl p-3.5 space-y-2.5 border border-slate-700/50 text-xs">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-400">Mã danh mục:</span>
+                                    <span id="meta-category" class="font-bold text-slate-200"></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-400">Số lượt xem:</span>
+                                    <span id="meta-views" class="font-bold text-slate-200"></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-400">Đánh giá:</span>
+                                    <span id="meta-rating" class="font-bold text-slate-200"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Interactive Assistance Widget -->
+                        <div class="border-t border-slate-800 pt-4">
+                            <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Trợ giúp khẩn cấp</h4>
+                            <p class="text-[11px] text-slate-300 mb-3 leading-normal">Nếu sau khi làm theo hướng dẫn mà vẫn chưa khắc phục được, vui lòng chọn:</p>
+                            
+                            <div class="space-y-2">
+                                <a href="https://www.ultraviewer.net/vi/UltraViewer_setup_6.6_vi.exe" target="_blank" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold py-2.5 px-3 rounded-lg flex items-center justify-center space-x-1.5 transition border border-slate-700">
+                                    <i data-lucide="download-cloud" class="w-4 h-4 text-indigo-400"></i>
+                                    <span>Tải Ultraviewer từ xa</span>
+                                </a>
+                                <a href="tel:19006134" class="w-full bg-visnam-accent hover:bg-orange-600 text-white text-[11px] font-extrabold py-2.5 px-3 rounded-lg flex items-center justify-center space-x-1.5 transition shadow">
+                                    <i data-lucide="phone" class="w-4 h-4 animate-pulse"></i>
+                                    <span>Gọi 1900 6134</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Rating -->
+                        <div class="border-t border-slate-800 pt-4">
+                            <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Đánh giá độ hữu ích</h4>
+                            <p class="text-[11px] text-slate-400 mb-2">Tài liệu này có giúp ích cho bạn khắc phục lỗi không?</p>
+                            
+                            <div class="flex space-x-1.5 text-xl text-slate-500" id="stars-feedback-container">
+                                <button onclick="setFeedbackStar(1)" class="star-btn hover:scale-110 transition">★</button>
+                                <button onclick="setFeedbackStar(2)" class="star-btn hover:scale-110 transition">★</button>
+                                <button onclick="setFeedbackStar(3)" class="star-btn hover:scale-110 transition">★</button>
+                                <button onclick="setFeedbackStar(4)" class="star-btn hover:scale-110 transition">★</button>
+                                <button onclick="setFeedbackStar(5)" class="star-btn hover:scale-110 transition">★</button>
+                            </div>
+                            <p id="star-hint" class="text-[10px] text-slate-500 mt-1 italic">Hãy chọn số sao để phản hồi.</p>
+                            <button id="btn-submit-rating" onclick="submitRating()" class="mt-3 w-full bg-white hover:bg-slate-100 text-slate-900 text-xs font-bold py-2 px-3 rounded-lg transition">
+                                Gửi phản hồi
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- PDF Actions -->
+                    <div class="pt-4 border-t border-slate-800 space-y-2">
+                        <button onclick="downloadPDF()" class="w-full bg-gradient-to-r from-visnam-primary to-visnam-secondary text-white text-xs font-bold py-2.5 px-4 rounded-xl hover:opacity-90 transition flex items-center justify-center space-x-2 shadow-md shadow-brand-100">
+                            <i data-lucide="download-cloud" class="w-4 h-4"></i>
+                            <span>Tải xuống PDF</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL 2: ADMIN LOGIN (With clean Inputs, Enter click, and Security) -->
+    <div id="login-modal" class="hidden fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeLoginModal()"></div>
+
+        <div class="bg-white rounded-2xl overflow-hidden shadow-2xl relative w-full max-w-sm z-10 p-6 animate-in fade-in zoom-in-95 duration-200">
+            <button onclick="closeLoginModal()" class="absolute right-4 top-4 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+
+            <div class="text-center mb-5">
+                <div class="w-10 h-10 bg-gradient-to-tr from-visnam-primary to-visnam-secondary rounded-lg flex items-center justify-center text-white font-bold text-xl mx-auto shadow-sm">
+                    V
+                </div>
+                <h3 class="text-lg font-extrabold text-slate-900 mt-3">Hệ thống Quản trị Visnam</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Xác thực quyền quản lý bài viết & danh mục</p>
+            </div>
+
+            <!-- Login Error -->
+            <div id="login-error" class="hidden bg-red-50 text-red-600 text-xs p-2.5 rounded-lg mb-3 border border-red-200 flex items-center space-x-2">
+                <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+                <span id="login-error-text">Tài khoản hoặc mật khẩu không đúng.</span>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Email quản trị</label>
+                    <input type="text" id="login-user" placeholder="Nhập email quản trị..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs focus:outline-none focus:border-visnam-primary" onkeydown="handleLoginKeydown(event)">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mật khẩu</label>
+                    <input type="password" id="login-pass" placeholder="Nhập mật khẩu..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs focus:outline-none focus:border-visnam-primary" onkeydown="handleLoginKeydown(event)">
+                </div>
+                <button onclick="submitLogin()" class="w-full bg-gradient-to-r from-visnam-primary to-visnam-secondary text-white font-bold py-2.5 px-4 rounded-xl hover:opacity-95 transition shadow-md flex items-center justify-center space-x-2">
+                    <i data-lucide="log-in" class="w-4 h-4"></i>
+                    <span>Xác thực đăng nhập</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL 3: ADD/EDIT ARTICLE (ADMIN ONLY) - NON-MANDATORY FIELDS -->
+    <div id="article-form-modal" class="hidden fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeArticleFormModal()"></div>
+
+        <div class="bg-white rounded-2xl overflow-hidden shadow-2xl relative w-full max-w-2xl z-10 flex flex-col h-[85vh] animate-in fade-in zoom-in-95 duration-200">
+            <!-- Form Header -->
+            <div class="bg-slate-900 text-white p-4 flex items-center justify-between shrink-0">
+                <div class="flex items-center space-x-2.5">
+                    <i data-lucide="file-edit" class="w-5 h-5 text-emerald-500"></i>
+                    <h3 id="form-modal-title" class="text-sm font-bold">Biên soạn tài liệu xử lý lỗi</h3>
+                </div>
+                <button onclick="closeArticleFormModal()" class="p-1 text-slate-400 hover:text-white rounded-lg">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Form Content -->
+            <div class="flex-grow p-5 overflow-y-auto space-y-4 text-xs">
+                <input type="hidden" id="edit-id">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-bold text-slate-500 uppercase tracking-wider mb-1">Tiêu đề bài viết <span class="text-red-500">*</span></label>
+                        <input type="text" id="article-title" placeholder="Ví dụ: Khắc phục lỗi Java..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs focus:outline-none focus:border-emerald-600">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-500 uppercase tracking-wider mb-1">Danh mục chuyên mục</label>
+                        <select id="article-category-select" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs focus:outline-none focus:border-emerald-600">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-500 uppercase tracking-wider mb-1">Mô tả ngắn gọn (Không bắt buộc)</label>
+                    <textarea id="article-summary" rows="2" placeholder="Nhập biểu hiện lỗi bên ngoài để khách dễ nhận biết..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs focus:outline-none focus:border-emerald-600"></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-500 uppercase tracking-wider mb-1">Các bước xử lý chi tiết (Không bắt buộc)</label>
+                    <textarea id="article-content" rows="6" placeholder="Bước 1: ...&#10;Bước 2: ...&#10;Bước 3: ..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs focus:outline-none focus:border-emerald-600 font-mono"></textarea>
+                </div>
+
+                <!-- PDF File Upload (NON-MANDATORY) -->
+                <div class="border-t border-slate-100 pt-4">
+                    <label class="block font-bold text-slate-500 uppercase tracking-wider mb-1">Tài liệu PDF đính kèm (Không bắt buộc)</label>
+                    <div class="flex items-center space-x-2">
+                        <div class="relative flex-grow">
+                            <input type="file" id="article-pdf-file" accept="application/pdf" onchange="handlePDFUpload(this)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                            <div class="w-full bg-slate-50 border border-dashed border-slate-300 rounded-lg py-3 px-4 text-center hover:bg-slate-100 transition">
+                                <span id="pdf-file-label" class="text-xs text-slate-500 flex items-center justify-center space-x-2">
+                                    <i data-lucide="file-up" class="w-4 h-4 text-slate-400"></i>
+                                    <span>Bấm để tải tệp tin PDF hỗ trợ</span>
+                                </span>
+                            </div>
+                        </div>
+                        <button onclick="clearPDFUpload()" class="p-2.5 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 rounded-lg transition" title="Xóa PDF">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Footer -->
+            <div class="bg-slate-50 p-3 border-t border-slate-200 flex justify-end space-x-2 shrink-0">
+                <button onclick="closeArticleFormModal()" class="px-4 py-2 text-xs font-bold text-slate-500 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition">Hủy bỏ</button>
+                <button onclick="saveArticle()" class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition flex items-center space-x-1.5">
+                    <i data-lucide="save" class="w-4 h-4"></i>
+                    <span>Lưu thông tin</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- TOAST ALERTS -->
+    <div id="toast-notification" class="hidden fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl flex items-center space-x-3 max-w-sm transition-all duration-300 transform translate-y-10 opacity-0">
+        <div class="p-1 bg-emerald-500 rounded-full text-white" id="toast-icon-box">
+            <i data-lucide="check" class="w-4 h-4"></i>
+        </div>
+        <div class="flex-grow">
+            <p id="toast-msg" class="text-xs font-bold leading-normal"></p>
+        </div>
+    </div>
+
+
+    <!-- INITIAL DATA AND SYSTEM INTERACTION SCRIPT -->
+    <!-- Fully upgraded Firebase configuration & realtime sync setup -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Credentials Provided by the User
+        const firebaseConfig = {
+            apiKey: "AIzaSyBxVjCofmTO3C6IZDynA91UUWZ6iEvj-RY",
+            authDomain: "huongdanhotro-d56de.firebaseapp.com",
+            projectId: "huongdanhotro-d56de",
+            storageBucket: "huongdanhotro-d56de.firebasestorage.app",
+            messagingSenderId: "651625894464",
+            appId: "1:651625894464:web:b63d52413b5d278f2705a5",
+            measurementId: "G-B6N72RHYC2"
+        };
+
+        // Initialize Firebase services
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // Collections with strict structure matching RULE 1
+        const articlesCol = collection(db, 'artifacts', appId, 'public', 'data', 'articles');
+        const categoriesCol = collection(db, 'artifacts', appId, 'public', 'data', 'categories');
+
+        // Local Memory fallback for immediate rendering & stability
+        let categories = ["Chữ ký số", "Hóa đơn điện tử", "Phần mềm kế toán", "Khai thuế & Hải quan", "Khác"];
+        let articles = [
+            {
+                id: "1",
+                title: "Khắc phục lỗi Chữ ký số không tìm thấy thiết bị USB Token",
+                category: "Chữ ký số",
+                summary: "Cách xử lý nhanh khi hệ thống thông báo thiết bị trống hoặc chưa được cắm USB Token chính xác vào máy tính của Visnam.",
+                content: "Bước 1: Rút thiết bị USB Token Visnam ra khỏi máy tính, đợi khoảng 5 giây và cắm lại sang cổng USB khác.\n\nBước 2: Click đúp chuột vào biểu tượng ổ đĩa ảo Visnam trong thư mục 'My Computer' / 'This PC'.\n\nBước 3: Tìm file mang tên 'Setup.exe' hoặc 'Visnam_Installer.exe', click chuột phải chọn 'Run as Administrator' để cài đặt lại Driver thiết bị.\n\nBước 4: Sau khi cài đặt hoàn tất, mở lại phần mềm ký và kiểm tra xem đèn tín hiệu trên USB Token có nháy đỏ sáng ổn định không.\n\nBước 5: Thử ký số lại và nhập mật khẩu PIN chính xác (Tránh nhập sai quá 5 lần thiết bị sẽ tự động khóa an toàn).",
+                pdfBlobUrl: "",
+                pdfFileName: "huong-dan-loi-token-visnam.pdf",
+                views: 521,
+                ratings: [5, 5, 4, 5, 5],
+                date: "2026-03-10"
+            },
+            {
+                id: "2",
+                title: "Hướng dẫn cài đặt Java & cấu hình sửa lỗi ký nộp tờ khai thuế",
+                category: "Khai thuế & Hải quan",
+                summary: "Chi tiết cách cấu hình phần mềm Java trên trình duyệt hỗ trợ, sửa dứt điểm lỗi báo 'Chưa cài đặt plugin ký số' trên trang Thuế.",
+                content: "Bước 1: Truy cập Control Panel trên máy tính của bạn và chọn 'Java' để cấu hình.\n\nBước 2: Trong tab 'Security', chuyển thanh trượt mức bảo mật xuống mức 'High' thay vì 'Very High'.\n\nBước 3: Click chọn nút 'Edit Site List' và điền địa chỉ cổng thông tin nộp thuế chính thức: https://thuedientu.gdt.gov.vn. Sau đó click Add và OK.\n\nBước 4: Restart lại trình duyệt (khuyến cáo dùng trình duyệt có tích hợp Plugin chữ ký số Visnam hoặc Chrome/Edge được kích hoạt extension).\n\nBước 5: Thử tải lại tờ khai và bấm nút 'Ký số' lần nữa.",
+                pdfBlobUrl: "",
+                pdfFileName: "cau-hinh-java-thuedientu.pdf",
+                views: 310,
+                ratings: [5, 4, 4, 3],
+                date: "2026-04-12"
+            },
+            {
+                id: "3",
+                title: "Khắc phục lỗi không gửi được email hóa đơn hàng loạt cho khách hàng",
+                category: "Hóa đơn điện tử",
+                summary: "Cấu hình lại máy chủ SMTP riêng của doanh nghiệp trên hệ thống hóa đơn điện tử Visnam để thông suốt luồng gửi mail gửi nhận hóa đơn.",
+                content: "Bước 1: Đăng nhập vào tài khoản hệ thống hóa đơn điện tử Visnam của bạn với vai trò là admin.\n\nBước 2: Tìm đến mục Cấu hình hệ thống -> Thiết lập máy chủ Email gửi nhận.\n\nBước 3: Nếu bạn dùng Gmail, hãy bật chế độ 'Xác minh 2 bước' của tài khoản gửi thư đó và tạo một 'Mật khẩu ứng dụng' (App Password).\n\nBước 4: Quay lại hệ thống Visnam, thiết lập cổng SMTP là 'smtp.gmail.com', cổng SSL là '465' (or TLS là '587'). Nhập tài khoản và dán mật khẩu ứng dụng vừa tạo.\n\nBước 5: Bấm nút 'Kiểm tra kết nối' để gửi một Email thử nghiệm, nếu thành công thì ấn 'Lưu cấu hình'.",
+                pdfBlobUrl: "",
+                pdfFileName: "huong-dan-gui-mail-smtp.pdf",
+                views: 189,
+                ratings: [5, 5, 5, 4],
+                date: "2026-05-01"
+            },
+            {
+                id: "4",
+                title: "Lỗi kết nối CSDL khi mở phần mềm Kế toán Visnam",
+                category: "Phần mềm kế toán",
+                summary: "Cách khởi động lại service SQL Server khi phần mềm kế toán không khởi động được hoặc báo mất kết nối cơ sở dữ liệu.",
+                content: "Bước 1: Nhấn tổ hợp phím 'Windows + R' trên bàn phím để mở hộp thoại Run.\n\nBước 2: Nhập cụm từ 'services.msc' rồi nhấn Enter.\n\nBước 3: Trong danh sách dịch vụ hiện ra, cuộn tìm dịch vụ mang tên 'SQL Server (MSSQLSERVER)' hoặc tên cài đặt SQL Server doanh nghiệp đang sử dụng.\n\nBước 4: Kiểm tra cột Status của dịch vụ này. Nếu cột trống hoặc ghi 'Stopped', hãy click chuột phải vào nó và chọn 'Start' hoặc 'Restart'.\n\nBước 5: Chờ dịch vụ chạy thành công (trạng thái hiển thị Running), mở lại phần mềm Kế toán Visnam để kiểm tra kết nối.",
+                pdfBlobUrl: "",
+                pdfFileName: "sua-loi-db-visnam.pdf",
+                views: 142,
+                ratings: [4, 4, 5],
+                date: "2026-05-18"
+            }
+        ];
+
+        // State managers
+        let currentView = 'client'; 
+        let currentFilterCategory = "Tất cả";
+        let currentSearchQuery = "";
+        let currentSort = "newest";
+        let adminUser = null;
+        let adminSearchQuery = "";
+
+        // Client Pagination State (9 items per page)
+        let currentPage = 1;
+        const itemsPerPage = 9;
+
+        // View Detail / Zoom Status
+        let activeArticleIdForView = null;
+        let pdfScale = 1.0;
+        let selectedStarFeedback = 0;
+        
+        // Temp admin variables
+        let temporaryPdfBlobUrl = null;
+        let temporaryPdfFileName = "";
+
+        // Unsubscribe Listeners references
+        let articlesUnsubscribe = null;
+        let categoriesUnsubscribe = null;
+
+        // RULE 3 - Initialize Auth, check for custom token priority
+        const initAuth = async () => {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                try {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } catch(e) {
+                    await signInAnonymously(auth);
+                }
+            } else {
+                await signInAnonymously(auth);
+            }
+        };
+
+        // Listen for authentication state shifts & trigger firestore data synchronization
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                await signInAnonymously(auth);
+                return;
+            }
+            
+            if (user && !user.isAnonymous) {
+                adminUser = user;
+            } else {
+                adminUser = null;
+            }
+            updateAuthUI();
+            
+            // Initiate reactive real-time database listener channels (RULE 2 - simple query)
+            subscribeToCategories();
+            subscribeToArticles();
+        });
+
+        // Subscribing to Categories Collection
+        function subscribeToCategories() {
+            if (categoriesUnsubscribe) categoriesUnsubscribe();
+            categoriesUnsubscribe = onSnapshot(categoriesCol, (snapshot) => {
+                const list = [];
+                snapshot.forEach(doc => {
+                    list.push(doc.data().name);
+                });
+                if (list.length > 0) {
+                    categories = list;
+                    renderCategories();
+                    renderAdminDashboard();
+                } else {
+                    // Seed initial data if database holds no categories
+                    seedDefaultCategories();
+                }
+            }, (error) => {
+                console.error("Categories Sync Error:", error);
+            });
+        }
+
+        // Subscribing to Articles Collection
+        function subscribeToArticles() {
+            if (articlesUnsubscribe) articlesUnsubscribe();
+            articlesUnsubscribe = onSnapshot(articlesCol, (snapshot) => {
+                const list = [];
+                snapshot.forEach(doc => {
+                    list.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                if (list.length > 0) {
+                    articles = list;
+                    renderArticles();
+                    renderAdminDashboard();
+                } else {
+                    // Seed initial articles if empty
+                    seedDefaultArticles();
+                }
+            }, (error) => {
+                console.error("Articles Sync Error:", error);
+            });
+        }
+
+        // Seeding database with initial default content
+        async function seedDefaultCategories() {
+            try {
+                const defaultCats = ["Chữ ký số", "Hóa đơn điện tử", "Phần mềm kế toán", "Khai thuế & Hải quan", "Khác"];
+                for (let cat of defaultCats) {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'categories', cat);
+                    await setDoc(docRef, { name: cat });
+                }
+            } catch (e) {
+                console.warn("Category Seeding was bypassed (due to firestore rules / guest mode):", e);
+            }
+        }
+
+        async function seedDefaultArticles() {
+            try {
+                const defaultArticles = [
+                    {
+                        title: "Khắc phục lỗi Chữ ký số không tìm thấy thiết bị USB Token",
+                        category: "Chữ ký số",
+                        summary: "Cách xử lý nhanh khi hệ thống thông báo thiết bị trống hoặc chưa được cắm USB Token chính xác vào máy tính của Visnam.",
+                        content: "Bước 1: Rút thiết bị USB Token Visnam ra khỏi máy tính, đợi khoảng 5 giây và cắm lại sang cổng USB khác.\n\nBước 2: Click đúp chuột vào biểu tượng ổ đĩa ảo Visnam trong thư mục 'My Computer' / 'This PC'.\n\nBước 3: Tìm file mang tên 'Setup.exe' hoặc 'Visnam_Installer.exe', click chuột phải chọn 'Run as Administrator' để cài đặt lại Driver thiết bị.\n\nBước 4: Sau khi cài đặt hoàn tất, mở lại phần mềm ký và kiểm tra xem đèn tín hiệu trên USB Token có nháy đỏ sáng ổn định không.\n\nBước 5: Thử ký số lại và nhập mật khẩu PIN chính xác (Tránh nhập sai quá 5 lần thiết bị sẽ tự động khóa an toàn).",
+                        pdfBlobUrl: "",
+                        pdfFileName: "huong-dan-loi-token-visnam.pdf",
+                        views: 521,
+                        ratings: [5, 5, 4, 5, 5],
+                        date: "2026-03-10"
+                    },
+                    {
+                        title: "Hướng dẫn cài đặt Java & cấu hình sửa lỗi ký nộp tờ khai thuế",
+                        category: "Khai thuế & Hải quan",
+                        summary: "Chi tiết cách cấu hình phần mềm Java trên trình duyệt hỗ trợ, sửa dứt điểm lỗi báo 'Chưa cài đặt plugin ký số' trên trang Thuế.",
+                        content: "Bước 1: Truy cập Control Panel trên máy tính của bạn và chọn 'Java' để cấu hình.\n\nBước 2: Trong tab 'Security', chuyển thanh trượt mức bảo mật xuống mức 'High' thay vì 'Very High'.\n\nBước 3: Click chọn nút 'Edit Site List' và điền địa chỉ cổng thông tin nộp thuế chính thức: https://thuedientu.gdt.gov.vn. Sau đó click Add và OK.\n\nBước 4: Restart lại trình duyệt (khuyến cáo dùng trình duyệt có tích hợp Plugin chữ ký số Visnam hoặc Chrome/Edge được kích hoạt extension).\n\nBước 5: Thử tải lại tờ khai và bấm nút 'Ký số' lần nữa.",
+                        pdfBlobUrl: "",
+                        pdfFileName: "cau-hinh-java-thuedientu.pdf",
+                        views: 310,
+                        ratings: [5, 4, 4, 3],
+                        date: "2026-04-12"
+                    },
+                    {
+                        title: "Khắc phục lỗi không gửi được email hóa đơn hàng loạt cho khách hàng",
+                        category: "Hóa đơn điện tử",
+                        summary: "Cấu hình lại máy chủ SMTP riêng của doanh nghiệp trên hệ thống hóa đơn điện tử Visnam để thông suốt luồng gửi mail gửi nhận hóa đơn.",
+                        content: "Bước 1: Đăng nhập vào tài khoản hệ thống hóa đơn điện tử Visnam của bạn với vai trò là admin.\n\nBước 2: Tìm đến mục Cấu hình hệ thống -> Thiết lập máy chủ Email gửi nhận.\n\nBước 3: Nếu bạn dùng Gmail, hãy bật chế độ 'Xác minh 2 bước' của tài khoản gửi thư đó và tạo một 'Mật khẩu ứng dụng' (App Password).\n\nBước 4: Quay lại hệ thống Visnam, thiết lập cổng SMTP là 'smtp.gmail.com', cổng SSL là '465' (hoặc TLS là '587'). Nhập tài khoản và dán mật khẩu ứng dụng vừa tạo.\n\nBước 5: Bấm nút 'Kiểm tra kết nối' để gửi một Email thử nghiệm, nếu thành công thì ấn 'Lưu cấu hình'.",
+                        pdfBlobUrl: "",
+                        pdfFileName: "huong-dan-gui-mail-smtp.pdf",
+                        views: 189,
+                        ratings: [5, 5, 5, 4],
+                        date: "2026-05-01"
+                    },
+                    {
+                        title: "Lỗi kết nối CSDL khi mở phần mềm Kế toán Visnam",
+                        category: "Phần mềm kế toán",
+                        summary: "Cách khởi động lại service SQL Server khi phần mềm kế toán không khởi động được hoặc báo mất kết nối cơ sở dữ liệu.",
+                        content: "Bước 1: Nhấn tổ hợp phím 'Windows + R' trên bàn phím để mở hộp thoại Run.\n\nBước 2: Nhập cụm từ 'services.msc' rồi nhấn Enter.\n\nBước 3: Trong danh sách dịch vụ hiện ra, cuộn tìm dịch vụ mang tên 'SQL Server (MSSQLSERVER)' hoặc tên cài đặt SQL Server doanh nghiệp đang sử dụng.\n\nBước 4: Kiểm tra cột Status của dịch vụ này. Nếu cột trống hoặc ghi 'Stopped', hãy click chuột phải vào nó và chọn 'Start' hoặc 'Restart'.\n\nBước 5: Chờ dịch vụ chạy thành công (trạng thái hiển thị Running), mở lại phần mềm Kế toán Visnam để kiểm tra kết nối.",
+                        pdfBlobUrl: "",
+                        pdfFileName: "sua-loi-db-visnam.pdf",
+                        views: 142,
+                        ratings: [4, 4, 5],
+                        date: "2026-05-18"
+                    }
+                ];
+                for (let art of defaultArticles) {
+                    await addDoc(articlesCol, art);
+                }
+            } catch (e) {
+                console.warn("Articles Seeding was bypassed (due to firestore rules / guest mode):", e);
+            }
+        }
+
+        // Return Home
+        function goHome() {
+            currentView = 'client';
+            document.getElementById('client-view').classList.remove('hidden');
+            document.getElementById('admin-view').classList.add('hidden');
+            
+            // Adjust toggle button style
+            const toggleBtn = document.getElementById('btn-toggle-view');
+            if (toggleBtn) {
+                toggleBtn.className = "flex items-center space-x-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition px-4 py-2 rounded-xl shadow-md";
+                document.getElementById('view-toggle-text').innerText = "Trang quản trị";
+                document.getElementById('view-toggle-icon').setAttribute('data-lucide', 'layout-dashboard');
+                
+                const mToggleText = document.getElementById('mobile-view-toggle-text');
+                if (mToggleText) mToggleText.innerText = "Chuyển sang Quản trị";
+            }
+            
+            resetFilters();
+            lucide.createIcons();
+        }
+
+        // Switching Views
+        function toggleViewMode() {
+            if (!adminUser) {
+                openLoginModal();
+                return;
+            }
+
+            const clientEl = document.getElementById('client-view');
+            const adminEl = document.getElementById('admin-view');
+            const toggleBtn = document.getElementById('btn-toggle-view');
+            const viewToggleText = document.getElementById('view-toggle-text');
+            const mobileToggleText = document.getElementById('mobile-view-toggle-text');
+
+            if (currentView === 'client') {
+                currentView = 'admin';
+                clientEl.classList.add('hidden');
+                adminEl.classList.remove('hidden');
+                
+                toggleBtn.className = "flex items-center space-x-2 text-sm font-bold text-indigo-700 bg-white border border-indigo-200 hover:bg-indigo-50 transition px-4 py-2 rounded-xl shadow-sm";
+                viewToggleText.innerText = "Xem giao diện khách";
+                if (mobileToggleText) mobileToggleText.innerText = "Xem giao diện khách";
+                
+                renderAdminDashboard();
+            } else {
+                currentView = 'client';
+                clientEl.classList.remove('hidden');
+                adminEl.classList.add('hidden');
+                
+                toggleBtn.className = "flex items-center space-x-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition px-4 py-2 rounded-xl shadow-md";
+                viewToggleText.innerText = "Trang quản trị";
+                if (mobileToggleText) mobileToggleText.innerText = "Trang quản trị";
+                
+                renderCategories();
+                renderArticles();
+            }
+            lucide.createIcons();
+        }
+
+        // Render Client Sidebar Categories
+        function renderCategories() {
+            const listContainer = document.getElementById('category-list');
+            if (!listContainer) return;
+
+            let html = `
+                <button onclick="filterCategory('Tất cả')" class="w-full text-left px-3.5 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition ${currentFilterCategory === 'Tất cả' ? 'bg-visnam-primary text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'}">
+                    <span class="flex items-center space-x-2">
+                        <i data-lucide="folder-open" class="w-4 h-4"></i>
+                        <span>Tất cả bài viết</span>
+                    </span>
+                    <span class="text-[10px] ${currentFilterCategory === 'Tất cả' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'} font-black px-2 py-0.5 rounded-full">${articles.length}</span>
+                </button>
+            `;
+
+            categories.forEach(cat => {
+                const count = articles.filter(a => a.category === cat).length;
+                const isActive = currentFilterCategory === cat;
+                html += `
+                    <button onclick="filterCategory('${cat}')" class="w-full text-left px-3.5 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition ${isActive ? 'bg-visnam-primary text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'}">
+                        <span class="flex items-center space-x-2">
+                            <i data-lucide="chevron-right" class="w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-slate-400'}"></i>
+                            <span class="truncate">${cat}</span>
+                        </span>
+                        <span class="text-[10px] ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'} font-black px-2 py-0.5 rounded-full">${count}</span>
+                    </button>
+                `;
+            });
+
+            listContainer.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        // Render Articles inside Guest dashboard grid with Pagination (Up to 9 items)
+        function renderArticles() {
+            const grid = document.getElementById('articles-grid');
+            const emptyState = document.getElementById('no-results');
+            if (!grid) return;
+
+            // 1. Filter
+            let filtered = articles.filter(art => {
+                const matchCat = (currentFilterCategory === "Tất cả" || art.category === currentFilterCategory);
+                const query = currentSearchQuery.toLowerCase().trim();
+                const matchSearch = query === "" || 
+                                    art.title.toLowerCase().includes(query) || 
+                                    art.summary.toLowerCase().includes(query) || 
+                                    art.category.toLowerCase().includes(query);
+                return matchCat && matchSearch;
+            });
+
+            // 2. Sort
+            if (currentSort === "newest") {
+                filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+            } else if (currentSort === "popular") {
+                filtered.sort((a, b) => b.views - a.views);
+            } else if (currentSort === "rating") {
+                filtered.sort((a, b) => parseFloat(getAverageRating(b.ratings)) - parseFloat(getAverageRating(a.ratings)));
+            }
+
+            // Update Meta Numbers
+            const filteredCountEl = document.getElementById('filtered-count');
+            const filteredTitleEl = document.getElementById('filtered-title');
+            if (filteredCountEl) filteredCountEl.innerText = filtered.length;
+            if (filteredTitleEl) filteredTitleEl.innerText = currentFilterCategory === "Tất cả" ? "Tất cả tài liệu hỗ trợ" : currentFilterCategory;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = "";
+                if (emptyState) emptyState.classList.remove('hidden');
+                const pagControls = document.getElementById('pagination-controls');
+                if (pagControls) pagControls.innerHTML = "";
+                return;
+            } else {
+                if (emptyState) emptyState.classList.add('hidden');
+            }
+
+            // 3. Paginate
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+            if (currentPage < 1) {
+                currentPage = 1;
+            }
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedArticles = filtered.slice(startIndex, endIndex);
+
+            let html = "";
+            paginatedArticles.forEach(art => {
+                const avgRating = getAverageRating(art.ratings);
+                
+                html += `
+                    <div class="bg-white rounded-2xl p-5 border border-slate-100 hover:border-slate-200 hover:shadow-lg transition duration-300 flex flex-col justify-between group relative h-[180px]">
+                        <div>
+                            <!-- Header tags inside card -->
+                            <div class="flex justify-between items-center mb-2.5">
+                                <span class="bg-slate-100 text-slate-700 text-[9px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">${art.category}</span>
+                                <span class="text-slate-400 text-xs flex items-center space-x-1">
+                                    <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                    <span class="text-[11px]">${art.views}</span>
+                                </span>
+                            </div>
+
+                            <!-- Clickable Title -->
+                            <h3 onclick="viewArticleDetails('${art.id}')" class="text-xs font-extrabold text-slate-900 group-hover:text-visnam-primary cursor-pointer line-clamp-2 transition mb-1.5" title="Xem tài liệu">
+                                ${art.title}
+                            </h3>
+
+                            <!-- Short Summary description -->
+                            <p class="text-[11px] text-slate-500 line-clamp-2 leading-relaxed mb-4 font-light">${art.summary}</p>
+                        </div>
+
+                        <!-- Card Footer actions info -->
+                        <div class="border-t border-slate-100 pt-2.5 flex justify-between items-center text-xs mt-auto">
+                            <div class="flex items-center space-x-1 text-amber-500 font-bold">
+                                <span>★</span>
+                                <span class="text-slate-700 text-[11px]">${avgRating}</span>
+                                <span class="text-[10px] text-slate-400 font-normal">(${art.ratings.length})</span>
+                            </div>
+
+                            <button onclick="viewArticleDetails('${art.id}')" class="text-xs font-bold text-visnam-primary group-hover:text-visnam-secondary flex items-center space-x-1 transition">
+                                <span>Xem quy trình</span>
+                                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+            renderPaginationControls(totalPages);
+            lucide.createIcons();
+        }
+
+        // Render Pagination Control buttons (Extremely compact and stable chevron layout)
+        function renderPaginationControls(totalPages) {
+            const paginationContainer = document.getElementById('pagination-controls');
+            if (!paginationContainer) return;
+
+            if (totalPages <= 1) {
+                paginationContainer.innerHTML = `<span class="text-xs text-slate-400 font-medium px-4">Trang 1 / 1</span>`;
+                return;
+            }
+
+            let html = `
+                <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled class="opacity-30 cursor-not-allowed"' : ''} class="p-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition flex items-center justify-center shrink-0">
+                    <i data-lucide="chevron-left" class="w-4 h-4 text-slate-600"></i>
+                </button>
+            `;
+
+            for (let i = 1; i <= totalPages; i++) {
+                html += `
+                    <button onclick="changePage(${i})" class="w-7 h-7 flex items-center justify-center text-xs font-extrabold rounded-lg transition ${currentPage === i ? 'bg-visnam-primary text-white shadow-sm' : 'bg-slate-50 hover:bg-slate-100 text-slate-600'}">
+                        ${i}
+                    </button>
+                `;
+            }
+
+            html += `
+                <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled class="opacity-30 cursor-not-allowed"' : ''} class="p-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition flex items-center justify-center shrink-0">
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-600"></i>
+                </button>
+            `;
+
+            paginationContainer.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            renderArticles();
+            const viewDisp = document.getElementById('view-dispatcher');
+            if (viewDisp) viewDisp.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Handle search in Admin dashboard
+        function handleAdminSearch(val) {
+            adminSearchQuery = val;
+            renderAdminDashboard();
+        }
+
+        // Render Admin Portal Data and lists (Updated with Admin Search and Tables limitation)
+        function renderAdminDashboard() {
+            // Update counts stats
+            const sTotalArticles = document.getElementById('stat-total-articles');
+            const sTotalCategories = document.getElementById('stat-total-categories');
+            const sTotalViews = document.getElementById('stat-total-views');
+            const sAvgRating = document.getElementById('stat-avg-rating');
+
+            if (sTotalArticles) sTotalArticles.innerText = articles.length;
+            if (sTotalCategories) sTotalCategories.innerText = categories.length;
+            
+            const totalViews = articles.reduce((sum, current) => sum + (current.views || 0), 0);
+            if (sTotalViews) sTotalViews.innerText = totalViews;
+
+            let ratingsSum = 0;
+            let ratingsCount = 0;
+            articles.forEach(art => {
+                if (art.ratings) {
+                    art.ratings.forEach(r => {
+                        ratingsSum += r;
+                        ratingsCount++;
+                    });
+                }
+            });
+            const globalAvg = ratingsCount > 0 ? (ratingsSum / ratingsCount).toFixed(1) : "5.0";
+            if (sAvgRating) sAvgRating.innerText = globalAvg;
+
+            // Render Articles Table
+            const tbody = document.getElementById('admin-articles-tbody');
+            if (tbody) {
+                // Filter list in admin workspace based on fast search
+                const query = adminSearchQuery.toLowerCase().trim();
+                const filteredAdminArticles = articles.filter(art => {
+                    return query === "" || 
+                           art.title.toLowerCase().includes(query) || 
+                           art.category.toLowerCase().includes(query) || 
+                           art.summary.toLowerCase().includes(query);
+                });
+
+                const adminTableCountEl = document.getElementById('admin-table-count');
+                if (adminTableCountEl) adminTableCountEl.innerText = filteredAdminArticles.length;
+
+                let tableHtml = "";
+                if (filteredAdminArticles.length === 0) {
+                    tableHtml = `
+                        <tr>
+                            <td colspan="5" class="p-8 text-center text-slate-400 text-xs">
+                                Không tìm thấy tài liệu hướng dẫn nào phù hợp.
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    filteredAdminArticles.forEach(art => {
+                        const avg = getAverageRating(art.ratings);
+                        tableHtml += `
+                            <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                                <td class="p-3 font-bold text-slate-900 max-w-xs truncate">${art.title}</td>
+                                <td class="p-3"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-semibold text-[10px]">${art.category}</span></td>
+                                <td class="p-3 text-center text-slate-500 font-semibold">${art.views || 0}</td>
+                                <td class="p-3 text-center font-bold text-amber-500">★ ${avg}</td>
+                                <td class="p-3 text-right">
+                                    <div class="flex items-center justify-end space-x-1">
+                                        <button onclick="openArticleModal('${art.id}')" class="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg" title="Sửa bài viết">
+                                            <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                        <button onclick="deleteArticle('${art.id}')" class="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg" title="Xóa bài viết">
+                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+                tbody.innerHTML = tableHtml;
+            }
+
+            // Render categories to Admin manager list
+            const catList = document.getElementById('admin-category-list');
+            if (catList) {
+                let catHtml = "";
+                categories.forEach(cat => {
+                    const count = articles.filter(a => a.category === cat).length;
+                    const html = `
+                        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-150 hover:bg-slate-100 transition text-xs">
+                            <span class="font-bold text-slate-700">${cat} <span class="font-normal text-slate-400">(${count})</span></span>
+                            <div class="flex items-center space-x-1">
+                                <button onclick="editCategoryName('${cat}')" class="p-1 bg-white hover:bg-slate-200 border border-slate-200 text-indigo-600 rounded" title="Sửa tên">
+                                    <i data-lucide="pencil" class="w-3 h-3"></i>
+                                </button>
+                                <button onclick="deleteCategory('${cat}')" class="p-1 bg-white hover:bg-red-50 border border-slate-200 text-red-600 rounded" title="Xóa">
+                                    <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    catHtml += html;
+                });
+                catList.innerHTML = catHtml;
+            }
+
+            lucide.createIcons();
+        }
+
+        // Filtering Trigger
+        function filterCategory(cat) {
+            currentFilterCategory = cat;
+            currentPage = 1; 
+            renderCategories();
+            renderArticles();
+        }
+
+        // Render PDF pages onto high-quality HTML5 Canvases directly within structured A4 containers
+        async function renderPDFPages(pdfUrl) {
+            const container = document.getElementById('pdf-dynamic-pages-container');
+            if (!container) return;
+
+            // Render Loading state
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center p-12 text-slate-400 bg-white w-full rounded shadow-2xl min-h-[400px]">
+                    <i data-lucide="loader-2" class="w-8 h-8 animate-spin text-visnam-primary mb-3"></i>
+                    <p class="text-xs font-bold">Đang phân tích & dựng dữ liệu tệp PDF hỗ trợ...</p>
+                    <p class="text-[10px] text-slate-500 mt-1">Hệ thống đang tải các trang tài liệu trực tiếp dưới dạng pixel A4 sạch.</p>
+                </div>
+            `;
+            lucide.createIcons();
+
+            try {
+                // Load PDF Document safely via PDF.js promise
+                const loadingTask = pdfjsLib.getDocument(pdfUrl);
+                const pdf = await loadingTask.promise;
+                container.innerHTML = ''; // Empty loader
+
+                // Render each page into separate beautifully branded A4 boxes
+                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                    const page = await pdf.getPage(pageNum);
+                    
+                    const pageDiv = document.createElement('div');
+                    pageDiv.className = "bg-white w-full shadow-2xl rounded-sm p-8 sm:p-12 text-slate-800 relative min-h-[850px] flex flex-col justify-between overflow-hidden";
+                    
+                    pageDiv.innerHTML = `
+                        <div class="border-b border-slate-200 pb-2.5 mb-4 flex justify-between items-start select-none">
+                            <div>
+                                <h4 class="text-xs font-black text-visnam-primary tracking-wide">CÔNG TY CỔ PHẦN THƯƠNG MẠI VISNAM</h4>
+                                <p class="text-[8px] text-slate-400 tracking-wider font-semibold">Tài liệu hướng dẫn trực quan đính kèm</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[8px] px-2 py-0.5 border border-slate-300 text-slate-500 font-mono rounded font-bold">PAGE ${pageNum} / ${pdf.numPages}</span>
+                            </div>
+                        </div>
+                        <div class="flex-grow flex items-center justify-center bg-slate-50/20 border border-slate-100 rounded p-1 overflow-hidden relative">
+                            <!-- Crispy pixel rendering viewport -->
+                            <canvas id="pdf-canvas-${pageNum}" class="max-w-full shadow-sm rounded-sm object-contain block select-none h-auto max-h-[750px]"></canvas>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 text-center text-[8px] text-slate-400 select-none">
+                            <p>Bản quyền thuộc Công Ty Cổ Phần Thương Mại Visnam © 2026</p>
+                        </div>
+                    `;
+                    
+                    container.appendChild(pageDiv);
+
+                    const canvas = document.getElementById(`pdf-canvas-${pageNum}`);
+                    const context = canvas.getContext('2d');
+                    
+                    const viewport = page.getViewport({ scale: 1.5 });
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    await page.render(renderContext).promise;
+                }
+            } catch (error) {
+                console.error("Native PDF.js Render Failure: ", error);
+                container.innerHTML = `
+                    <div class="bg-white w-full shadow-2xl rounded-sm p-10 text-center text-red-500">
+                        <i data-lucide="alert-triangle" class="w-8 h-8 mx-auto mb-2 text-red-500"></i>
+                        <p class="text-xs font-bold">Không thể hiển thị tài liệu PDF đính kèm tự động.</p>
+                        <p class="text-[10px] text-slate-500 mt-1">Xin vui lòng click nút "Tải xuống PDF" ở thanh bên phải để đọc trực tiếp.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        }
+
+        // View article details inside beautiful modal & increment views in Firestore
+        async function viewArticleDetails(id) {
+            const article = articles.find(a => a.id === id);
+            if (!article) return;
+
+            activeArticleIdForView = id;
+            pdfScale = 1.0; // Reset zoom
+
+            // Increment views on cloud instantly matching instructions
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', id);
+                await updateDoc(docRef, {
+                    views: (article.views || 0) + 1
+                });
+            } catch(e) {
+                console.warn("View counter Firestore sync bypassed:", e);
+            }
+
+            const modal = document.getElementById('view-article-modal');
+            const mTitle = document.getElementById('modal-title');
+            const mCategory = document.getElementById('modal-category');
+            
+            const pTitle = document.getElementById('pdf-title');
+            const pDesc = document.getElementById('pdf-description');
+            const pStepsPlain = document.getElementById('pdf-steps-plain');
+            const pFileNameText = document.getElementById('pdf-file-name-bar');
+            
+            const metaCategory = document.getElementById('meta-category');
+            const metaViews = document.getElementById('meta-views');
+            const metaRating = document.getElementById('meta-rating');
+
+            resetFeedbackStarsState();
+
+            if (mTitle) mTitle.innerText = article.title;
+            if (mCategory) mCategory.innerText = article.category.toUpperCase();
+            if (pFileNameText) pFileNameText.innerText = article.pdfFileName || "tai-lieu-huong-dan-visnam.pdf";
+
+            if (metaCategory) metaCategory.innerText = article.category;
+            if (metaViews) metaViews.innerText = (article.views || 0) + " lượt";
+            if (metaRating) metaRating.innerText = "⭐ " + getAverageRating(article.ratings) + " (" + (article.ratings ? article.ratings.length : 0) + ")";
+
+            const pageMock = document.getElementById('pdf-page-mock');
+            const pdfDynamicPagesContainer = document.getElementById('pdf-dynamic-pages-container');
+
+            if (pTitle) pTitle.innerText = article.title.toUpperCase();
+            if (pDesc) pDesc.innerText = article.summary || "Mô tả sự cố kỹ thuật này chưa có nội dung cụ thể.";
+            if (pStepsPlain) {
+                pStepsPlain.innerText = article.content || "Nội dung khắc phục lỗi đang được cập nhật...";
+            }
+
+            if (article.pdfBlobUrl) {
+                if (pdfDynamicPagesContainer) {
+                    pdfDynamicPagesContainer.classList.remove('hidden');
+                    renderPDFPages(article.pdfBlobUrl); 
+                }
+                if (pageMock) pageMock.classList.add('hidden');
+            } else {
+                if (pdfDynamicPagesContainer) {
+                    pdfDynamicPagesContainer.classList.add('hidden');
+                    pdfDynamicPagesContainer.innerHTML = ''; 
+                }
+                if (pageMock) pageMock.classList.remove('hidden');
+            }
+
+            updatePdfZoom();
+
+            if (modal) modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        // Zoom In / Zoom Out Features
+        function zoomIn() {
+            if (pdfScale < 1.6) {
+                pdfScale += 0.1;
+                updatePdfZoom();
+            }
+        }
+
+        function zoomOut() {
+            if (pdfScale > 0.6) {
+                pdfScale -= 0.1;
+                updatePdfZoom();
+            }
+        }
+
+        function resetZoom() {
+            pdfScale = 1.0;
+            updatePdfZoom();
+        }
+
+        function updatePdfZoom() {
+            const mockWrapper = document.getElementById('pdf-zoom-wrapper');
+            const percentLabel = document.getElementById('zoom-percent');
+
+            if (mockWrapper) mockWrapper.style.transform = `scale(${pdfScale})`;
+            if (percentLabel) percentLabel.innerText = Math.round(pdfScale * 100) + '%';
+        }
+
+        function setupGrabScroll() {
+            const container = document.getElementById('pdf-viewer-container');
+            if (!container) return;
+            let isDown = false;
+            let startX, startY;
+            let scrollLeft, scrollTop;
+
+            container.addEventListener('mousedown', (e) => {
+                isDown = true;
+                container.classList.add('active');
+                startX = e.pageX - container.offsetLeft;
+                startY = e.pageY - container.offsetTop;
+                scrollLeft = container.scrollLeft;
+                scrollTop = container.scrollTop;
+            });
+
+            container.addEventListener('mouseleave', () => {
+                isDown = false;
+            });
+
+            container.addEventListener('mouseup', () => {
+                isDown = false;
+            });
+
+            container.addEventListener('mousemove', (e) => {
+                if(!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - container.offsetLeft;
+                const y = e.pageY - container.offsetTop;
+                const walkX = (x - startX) * 1.5; 
+                const walkY = (y - startY) * 1.5;
+                container.scrollLeft = scrollLeft - walkX;
+                container.scrollTop = scrollTop - walkY;
+            });
+        }
+
+        function closeArticleModal() {
+            const modal = document.getElementById('view-article-modal');
+            if (modal) modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+            
+            const pdfDynamicPagesContainer = document.getElementById('pdf-dynamic-pages-container');
+            if (pdfDynamicPagesContainer) pdfDynamicPagesContainer.innerHTML = '';
+            
+            activeArticleIdForView = null;
+        }
+
+        function downloadPDF() {
+            const article = articles.find(a => a.id === activeArticleIdForView);
+            if (!article) return;
+
+            if (article.pdfBlobUrl) {
+                const link = document.createElement('a');
+                link.href = article.pdfBlobUrl;
+                link.download = article.pdfFileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                const contentText = `
+=========================================================
+CÔNG TY CỔ PHẦN THƯƠNG MẠI VISNAM
+TÀI LIỆU HƯỚNG DẪN XỬ LÝ SỰ CỐ KỸ THUẬT CHUYÊN NGHIỆP
+=========================================================
+
+Chuyên mục: ${article.category.toUpperCase()}
+Tiêu đề: ${article.title}
+Biên soạn bởi: Phòng Kỹ Thuật Nghiệp Vụ Visnam
+
+MÔ TẢ SỰ CỐ:
+${article.summary || "Chưa có mô tả ngắn"}
+
+HƯỚNG DẪN CHI TIẾT CÁC BƯỚC THỰC HIỆN:
+${article.content || "Chưa có nội dung"}
+
+---------------------------------------------------------
+Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
+Địa chỉ liên hệ: 33 Hải Hồ, Hải Châu, Đà Nẵng
+                `;
+                const blob = new Blob([contentText], { type: 'text/plain;charset=utf-8' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = (article.pdfFileName ? article.pdfFileName.replace('.pdf', '.txt') : "tailieu-huongdan.txt");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            showToast("Đang chuẩn bị tải tài liệu xuống thiết bị...", "check");
+        }
+
+        function printArticle() {
+            window.print();
+        }
+
+        function setFeedbackStar(starIndex) {
+            selectedStarFeedback = starIndex;
+            const starButtons = document.querySelectorAll('#stars-feedback-container .star-btn');
+            
+            starButtons.forEach((btn, idx) => {
+                if (idx < starIndex) {
+                    btn.classList.add('text-amber-500');
+                    btn.classList.remove('text-slate-500');
+                } else {
+                    btn.classList.remove('text-amber-500');
+                    btn.classList.add('text-slate-500');
+                }
+            });
+
+            const hints = [
+                "Không hữu ích lắm",
+                "Chưa giải quyết triệt để",
+                "Hiểu cơ bản",
+                "Rất hữu ích",
+                "Tuyệt vời, khắc phục lỗi hoàn toàn!"
+            ];
+            const starHint = document.getElementById('star-hint');
+            if (starHint) {
+                starHint.innerText = hints[starIndex - 1];
+                starHint.classList.add('text-amber-500', 'font-semibold');
+            }
+        }
+
+        function resetFeedbackStarsState() {
+            selectedStarFeedback = 0;
+            const starButtons = document.querySelectorAll('#stars-feedback-container .star-btn');
+            starButtons.forEach(btn => {
+                btn.classList.remove('text-amber-500');
+                btn.classList.add('text-slate-500');
+            });
+            const starHint = document.getElementById('star-hint');
+            const submitBtn = document.getElementById('btn-submit-rating');
+            if (starHint) {
+                starHint.innerText = "Hãy chọn số sao để phản hồi.";
+                starHint.className = "text-[10px] text-slate-400 mt-1 italic";
+            }
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Gửi phản hồi";
+            }
+        }
+
+        async function submitRating() {
+            if (selectedStarFeedback === 0) {
+                showToast("Vui lòng chọn số sao trước!", "alert");
+                return;
+            }
+
+            const article = articles.find(a => a.id === activeArticleIdForView);
+            if (!article) return;
+
+            const currentRatings = article.ratings || [];
+            const newRatings = [...currentRatings, selectedStarFeedback];
+
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', article.id);
+                await updateDoc(docRef, {
+                    ratings: newRatings
+                });
+                showToast("Đã ghi nhận đánh giá hữu ích thành công!", "check");
+                resetFeedbackStarsState();
+                
+                const metaRating = document.getElementById('meta-rating');
+                if (metaRating) {
+                    metaRating.innerText = "⭐ " + getAverageRating(newRatings) + " (" + newRatings.length + ")";
+                }
+                const submitBtn = document.getElementById('btn-submit-rating');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerText = "Cảm ơn ý kiến của bạn!";
+                }
+            } catch(e) {
+                showToast("Lỗi gửi đánh giá lên Cloud: " + e.message, "alert");
+            }
+        }
+
+        /* MODAL 2: ADMIN LOGIN & AUTH SIGN-IN */
+        function handleLoginKeydown(e) {
+            if (e.key === 'Enter') {
+                submitLogin();
+            }
+        }
+
+        async function submitLogin() {
+            const userEl = document.getElementById('login-user');
+            const passEl = document.getElementById('login-pass');
+            const email = userEl ? userEl.value.trim() : "";
+            const pass = passEl ? passEl.value.trim() : "";
+
+            if (!email || !pass) {
+                showToast("Vui lòng nhập tài khoản và mật khẩu!", "alert");
+                return;
+            }
+
+            try {
+                // Sign in with authentic Firebase Auth
+                await signInWithEmailAndPassword(auth, email, pass);
+                closeLoginModal();
+                showToast("Đăng nhập vai trò Quản trị viên thành công!", "check");
+            } catch(e) {
+                const lErr = document.getElementById('login-error');
+                const lErrText = document.getElementById('login-error-text');
+                if (lErr) lErr.classList.remove('hidden');
+                if (lErrText) lErrText.innerText = "Lỗi đăng nhập: " + e.message;
+                showToast("Đăng nhập thất bại!", "alert");
+            }
+        }
+
+        async function logoutAdmin() {
+            try {
+                await signOut(auth);
+                // Return back to client view upon logging out
+                if (currentView === 'admin') {
+                    toggleViewMode(); 
+                }
+                showToast("Đã thoát tài khoản quản trị viên.", "check");
+            } catch(e) {
+                showToast("Lỗi khi đăng xuất: " + e.message, "alert");
+            }
+        }
+
+        function updateAuthUI() {
+            const desktopGroup = document.getElementById('admin-active-group');
+            const loginBtn = document.getElementById('btn-admin-login');
+            const mLoginBtn = document.getElementById('btn-mobile-login');
+            const mAdminGroup = document.getElementById('mobile-admin-active');
+
+            if (adminUser) {
+                if (desktopGroup) desktopGroup.classList.remove('hidden');
+                if (loginBtn) loginBtn.classList.add('hidden');
+                if (mLoginBtn) mLoginBtn.classList.add('hidden');
+                if (mAdminGroup) mAdminGroup.classList.remove('hidden');
+            } else {
+                if (desktopGroup) desktopGroup.classList.add('hidden');
+                if (loginBtn) loginBtn.classList.remove('hidden');
+                if (mLoginBtn) mLoginBtn.classList.remove('hidden');
+                if (mAdminGroup) mAdminGroup.classList.add('hidden');
+            }
+        }
+
+        /* MODAL 3: ADD/EDIT ARTICLE (ADMIN ONLY) - NON-MANDATORY FIELDS */
+        function openArticleModal(id = null) {
+            const modal = document.getElementById('article-form-modal');
+            const modalTitle = document.getElementById('form-modal-title');
+            
+            const titleInput = document.getElementById('article-title');
+            const selectCat = document.getElementById('article-category-select');
+            const summaryInput = document.getElementById('article-summary');
+            const contentInput = document.getElementById('article-content');
+            const editIdInput = document.getElementById('edit-id');
+
+            clearPDFUpload();
+
+            let optionsHtml = "";
+            categories.forEach(cat => {
+                optionsHtml += `<option value="${cat}">${cat}</option>`;
+            });
+            if (selectCat) selectCat.innerHTML = optionsHtml;
+
+            if (id) {
+                const article = articles.find(a => a.id === id);
+                if (!article) return;
+
+                if (modalTitle) modalTitle.innerText = "Chỉnh sửa bài viết tài liệu lỗi";
+                if (editIdInput) editIdInput.value = article.id;
+                if (titleInput) titleInput.value = article.title;
+                if (selectCat) selectCat.value = article.category;
+                if (summaryInput) summaryInput.value = article.summary;
+                if (contentInput) contentInput.value = article.content;
+
+                if (article.pdfBlobUrl) {
+                    temporaryPdfBlobUrl = article.pdfBlobUrl;
+                    temporaryPdfFileName = article.pdfFileName;
+                    const label = document.getElementById('pdf-file-label');
+                    if (label) {
+                        label.innerHTML = `
+                            <i data-lucide="file-check" class="w-4 h-4 text-emerald-600"></i>
+                            <span class="text-emerald-700 font-bold">${article.pdfFileName}</span>
+                        `;
+                    }
+                }
+            } else {
+                if (modalTitle) modalTitle.innerText = "Đăng tài liệu hướng dẫn sự cố mới";
+                if (editIdInput) editIdInput.value = "";
+                if (titleInput) titleInput.value = "";
+                if (summaryInput) summaryInput.value = "";
+                if (contentInput) contentInput.value = "";
+            }
+
+            if (modal) modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeArticleFormModal() {
+            const modal = document.getElementById('article-form-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function handlePDFUpload(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                temporaryPdfBlobUrl = URL.createObjectURL(file);
+                temporaryPdfFileName = file.name;
+
+                const label = document.getElementById('pdf-file-label');
+                if (label) {
+                    label.innerHTML = `
+                        <i data-lucide="file-check" class="w-4 h-4 text-emerald-600"></i>
+                        <span class="text-emerald-700 font-bold">${file.name}</span>
+                    `;
+                }
+                lucide.createIcons();
+                showToast("Đã đính kèm tệp tin PDF thành công", "check");
+            }
+        }
+
+        function clearPDFUpload() {
+            const fileInput = document.getElementById('article-pdf-file');
+            if (fileInput) fileInput.value = "";
+            temporaryPdfBlobUrl = null;
+            temporaryPdfFileName = "";
+            const label = document.getElementById('pdf-file-label');
+            if (label) {
+                label.innerHTML = `
+                    <i data-lucide="file-up" class="w-4 h-4 text-slate-400"></i>
+                    <span>Bấm để tải tệp tin PDF hỗ trợ</span>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        // Save Article dynamically on Firestore
+        async function saveArticle() {
+            const editIdEl = document.getElementById('edit-id');
+            const titleEl = document.getElementById('article-title');
+            const selectCatEl = document.getElementById('article-category-select');
+            const summaryEl = document.getElementById('article-summary');
+            const contentEl = document.getElementById('article-content');
+
+            const editId = editIdEl ? editIdEl.value : "";
+            const title = titleEl ? titleEl.value.trim() : "";
+            const category = selectCatEl ? selectCatEl.value : "";
+            
+            const summary = (summaryEl && summaryEl.value.trim()) || "Biểu hiện lỗi đang được ban kỹ thuật bổ sung thêm thông tin.";
+            const content = (contentEl && contentEl.value.trim()) || "Bước 1: Kiểm tra kết nối thiết bị.\nBước 2: Khởi động cài đặt phần mềm.\nBước 3: Liên hệ tổng đài 1900 6134 để được hỗ trợ điều khiển từ xa.";
+
+            if (!title) {
+                showToast("Vui lòng nhập tên/tiêu đề tài liệu!", "alert");
+                return;
+            }
+
+            try {
+                if (editId) {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', editId);
+                    await updateDoc(docRef, {
+                        title,
+                        category,
+                        summary,
+                        content,
+                        pdfBlobUrl: temporaryPdfBlobUrl || "",
+                        pdfFileName: temporaryPdfFileName || (title.toLowerCase().replace(/[^a-z0-9]/g, '-') + '.pdf')
+                    });
+                    showToast("Cập nhật tài liệu hỗ trợ thành công!", "check");
+                } else {
+                    const newArticle = {
+                        title,
+                        category,
+                        summary,
+                        content,
+                        pdfBlobUrl: temporaryPdfBlobUrl || "",
+                        pdfFileName: temporaryPdfFileName || (title.toLowerCase().replace(/[^a-z0-9]/g, '-') + '.pdf'),
+                        views: 0,
+                        ratings: [5],
+                        date: new Date().toISOString().split('T')[0]
+                    };
+                    await addDoc(articlesCol, newArticle);
+                    showToast("Tạo mới tài liệu hỗ trợ thành công!", "check");
+                }
+                closeArticleFormModal();
+            } catch(e) {
+                console.error("Save Article Error:", e);
+                showToast("Lỗi phân quyền Firestore: " + e.message, "alert");
+            }
+        }
+
+        async function deleteArticle(id) {
+            const confirmed = window.confirm("Bạn có chắc chắn muốn xóa tài liệu hướng dẫn này?");
+            if (confirmed) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', id);
+                    await deleteDoc(docRef);
+                    showToast("Đã xóa tệp tài liệu thành công.", "check");
+                } catch(e) {
+                    showToast("Lỗi xóa Firestore: " + e.message, "alert");
+                }
+            }
+        }
+
+        function handleSort(val) {
+            currentSort = val;
+            currentPage = 1;
+            renderArticles();
+            showToast("Đã sắp xếp lại danh sách tài liệu", "check");
+        }
+
+        function handleSearch(val) {
+            currentSearchQuery = val;
+            currentPage = 1;
+            renderArticles();
+        }
+
+        function triggerSearch() {
+            currentPage = 1;
+            renderArticles();
+            showToast("Đã lọc tài liệu tương ứng", "check");
+        }
+
+        function setQuickSearch(word) {
+            const searchBox = document.getElementById('main-search');
+            if (searchBox) searchBox.value = word;
+            currentSearchQuery = word;
+            currentPage = 1;
+            renderArticles();
+            showToast("Từ khóa: " + word, "check");
+        }
+
+        function resetFilters() {
+            currentFilterCategory = "Tất cả";
+            currentSearchQuery = "";
+            currentPage = 1;
+            const searchBox = document.getElementById('main-search');
+            if (searchBox) searchBox.value = "";
+            renderCategories();
+            renderArticles();
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+
+        /* ADMIN INLINE CATEGORY CONTROLLERS */
+        async function addCategoryAdmin() {
+            const input = document.getElementById('admin-new-category-name');
+            const name = input ? input.value.trim() : "";
+
+            if (!name) {
+                showToast("Vui lòng điền tên danh mục!", "alert");
+                return;
+            }
+
+            if (categories.includes(name)) {
+                showToast("Danh mục này đã tồn tại!", "alert");
+                return;
+            }
+
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'categories', name);
+                await setDoc(docRef, { name: name });
+                if (input) input.value = "";
+                showToast("Đã thêm danh mục mới!", "check");
+            } catch(e) {
+                showToast("Lỗi lưu chuyên mục: " + e.message, "alert");
+            }
+        }
+
+        async function editCategoryName(oldName) {
+            const newName = window.prompt("Sửa tên danh mục '" + oldName + "' thành:", oldName);
+            if (newName && newName.trim() !== "" && newName.trim() !== oldName) {
+                const trimmed = newName.trim();
+                try {
+                    const oldDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'categories', oldName);
+                    const newDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'categories', trimmed);
+                    
+                    await deleteDoc(oldDocRef);
+                    await setDoc(newDocRef, { name: trimmed });
+
+                    // Cascade changes to articles under this category
+                    const affectedArticles = articles.filter(art => art.category === oldName);
+                    for (let art of affectedArticles) {
+                        const artDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', art.id);
+                        await updateDoc(artDocRef, { category: trimmed });
+                    }
+
+                    showToast("Đã cập nhật tên danh mục thành công!", "check");
+                } catch(e) {
+                    showToast("Lỗi sửa danh mục: " + e.message, "alert");
+                }
+            }
+        }
+
+        async function deleteCategory(catName) {
+            const count = articles.filter(a => a.category === catName).length;
+            if (count > 0) {
+                const force = window.confirm(`Danh mục đang chứa ${count} bài viết. Các bài viết này sẽ được gán sang chuyên mục 'Khác'. Bạn muốn tiếp tục xóa chứ?`);
+                if (!force) return;
+
+                try {
+                    const affectedArticles = articles.filter(art => art.category === catName);
+                    for (let art of affectedArticles) {
+                        const artDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', art.id);
+                        await updateDoc(artDocRef, { category: "Khác" });
+                    }
+                } catch(e) {
+                    showToast("Lỗi cập nhật bài viết: " + e.message, "alert");
+                    return;
+                }
+            }
+
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'categories', catName);
+                await deleteDoc(docRef);
+                showToast("Đã xóa chuyên mục hỗ trợ thành công.", "check");
+            } catch(e) {
+                showToast("Lỗi xóa danh mục: " + e.message, "alert");
+            }
+        }
+
+        // Initialize Anonymous Auth to execute rules safely
+        initAuth();
+
+        // Bind internal scope variables & helper actions safely to global window
+        window.goHome = goHome;
+        window.toggleViewMode = toggleViewMode;
+        window.openLoginModal = openLoginModal;
+        window.closeLoginModal = closeLoginModal;
+        window.submitLogin = submitLogin;
+        window.logoutAdmin = logoutAdmin;
+        window.openArticleModal = openArticleModal;
+        window.closeArticleFormModal = closeArticleFormModal;
+        window.handlePDFUpload = handlePDFUpload;
+        window.clearPDFUpload = clearPDFUpload;
+        window.saveArticle = saveArticle;
+        window.deleteArticle = deleteArticle;
+        window.addCategoryAdmin = addCategoryAdmin;
+        window.editCategoryName = editCategoryName;
+        window.deleteCategory = deleteCategory;
+        window.filterCategory = filterCategory;
+        window.handleSort = handleSort;
+        window.handleSearch = handleSearch;
+        window.triggerSearch = triggerSearch;
+        window.setQuickSearch = setQuickSearch;
+        window.resetFilters = resetFilters;
+        window.toggleMobileMenu = toggleMobileMenu;
+        window.viewArticleDetails = viewArticleDetails;
+        window.closeArticleModal = closeArticleModal;
+        window.zoomIn = zoomIn;
+        window.zoomOut = zoomOut;
+        window.resetZoom = resetZoom;
+        window.downloadPDF = downloadPDF;
+        window.printArticle = printArticle;
+        window.setFeedbackStar = setFeedbackStar;
+        window.submitRating = submitRating;
+        window.handleLoginKeydown = handleLoginKeydown;
+        window.handleAdminSearch = handleAdminSearch;
+    </script>
+</body>
+</html>
