@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trung tâm Hỗ trợ Kỹ thuật & Xử lý sự cố - Visnam</title>
     <!-- PREMIUM FAVICON - Đồng bộ 100% với Logo của hệ thống -->
-    <link class="visnam-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='url(%23grad)'/><path d='M28 25 L46 72 L54 72 L72 25 L58 25 L50 58 L42 25 Z' fill='%23ffffff'/><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%230D5392'/><stop offset='100%25' stop-color='%2300A3E0'/></linearGradient></defs></svg>">
+    <link class="visnam-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='url(%23grad)'/><path d='M25 30 L45 75 C47 80, 53 80, 55 75 L75 30 L62 30 L50 60 L38 30 Z' fill='%23ffffff'/><circle cx='50' cy='32' r='6' fill='%23F25F22'/><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%230D5392'/><stop offset='100%25' stop-color='%2300A3E0'/></linearGradient></defs></svg>">
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -73,6 +73,7 @@
         /* Con trỏ cầm nắm tài liệu hỗ trợ kéo thả */
         .grab-scroll {
             cursor: grab;
+            user-select: none;
         }
         .grab-scroll:active {
             cursor: grabbing;
@@ -104,9 +105,17 @@
             <div class="flex justify-between items-center h-12 md:h-14">
                 <!-- LOGO & BRAND (Identical to Favicon design) -->
                 <div class="flex items-center space-x-2.5 cursor-pointer" onclick="goHome()">
-                    <div class="w-8 h-8 md:w-9 md:h-9 bg-gradient-to-tr from-visnam-primary to-visnam-secondary rounded-lg flex items-center justify-center text-white font-extrabold text-lg shadow-md transform hover:scale-105 transition duration-200 select-none">
-                        V
-                    </div>
+                    <svg class="w-8 h-8 md:w-9 md:h-9 transform hover:scale-105 transition duration-200 select-none shrink-0" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="100" height="100" rx="24" fill="url(#headerGrad)"/>
+                        <path d="M25 30 L45 75 C47 80, 53 80, 55 75 L75 30 L62 30 L50 60 L38 30 Z" fill="#ffffff"/>
+                        <circle cx="50" cy="32" r="6" fill="#F25F22"/>
+                        <defs>
+                            <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#0D5392"/>
+                                <stop offset="100%" stop-color="#00A3E0"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
                     <div>
                         <div class="flex items-center space-x-1">
                             <span class="text-sm md:text-base font-black tracking-wider text-visnam-primary">VISNAM</span>
@@ -447,10 +456,18 @@
                 <!-- Company Bio -->
                 <div class="space-y-2">
                     <div class="flex items-center space-x-2.5">
-                        <!-- Identical Icon Logo to keep brand unified -->
-                        <div class="w-8 h-8 bg-gradient-to-tr from-visnam-primary to-visnam-secondary rounded-lg flex items-center justify-center text-white font-black text-lg">
-                            V
-                        </div>
+                        <!-- PREMIUM FAVICON / LOGO - Đồng bộ hoàn toàn -->
+                        <svg class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="100" height="100" rx="24" fill="url(#footerGrad)"/>
+                            <path d="M25 30 L45 75 C47 80, 53 80, 55 75 L75 30 L62 30 L50 60 L38 30 Z" fill="#ffffff"/>
+                            <circle cx="50" cy="32" r="6" fill="#F25F22"/>
+                            <defs>
+                                <linearGradient id="footerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#0D5392"/>
+                                    <stop offset="100%" stop-color="#00A3E0"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
                         <span class="text-sm font-extrabold text-white tracking-wider">VISNAM COMMERCE</span>
                     </div>
                     <p class="text-[11px] text-slate-400 leading-relaxed">
@@ -556,7 +573,7 @@
                 </div>
             </div>
 
-            <!-- Modal Content - Split layout -->
+            <!-- Modal Content -->
             <div class="flex-grow flex flex-col lg:flex-row overflow-hidden bg-slate-950">
                 
                 <!-- Left panel: Simulated PDF Viewport (Clean, support click & drag scroll) -->
@@ -612,7 +629,7 @@
                                 </div>
                             </div>
 
-                            <!-- DYNAMIC PDF PAGES CONTAINER (Used when actual PDF is uploaded, rendered via PDF.js as canvases) -->
+                            <!-- DYNAMIC PDF PAGES CONTAINER -->
                             <div id="pdf-dynamic-pages-container" class="w-full flex flex-col space-y-6 hidden"></div>
 
                         </div>
@@ -699,9 +716,18 @@
             </button>
 
             <div class="text-center mb-5">
-                <div class="w-10 h-10 bg-gradient-to-tr from-visnam-primary to-visnam-secondary rounded-lg flex items-center justify-center text-white font-bold text-xl mx-auto shadow-sm select-none">
-                    V
-                </div>
+                <!-- PREMIUM FAVICON / LOGO - Đồng bộ hoàn toàn -->
+                <svg class="w-10 h-10 mx-auto mb-3 shadow-md rounded-lg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="100" height="100" rx="24" fill="url(#modalLogoGrad)"/>
+                    <path d="M25 30 L45 75 C47 80, 53 80, 55 75 L75 30 L62 30 L50 60 L38 30 Z" fill="#ffffff"/>
+                    <circle cx="50" cy="32" r="6" fill="#F25F22"/>
+                    <defs>
+                        <linearGradient id="modalLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#0D5392"/>
+                            <stop offset="100%" stop-color="#00A3E0"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
                 <h3 class="text-lg font-extrabold text-slate-900 mt-3">Hệ thống Quản trị Visnam</h3>
                 <p class="text-xs text-slate-500 mt-0.5">Xác thực quyền quản lý bài viết & danh mục</p>
             </div>
@@ -1628,6 +1654,7 @@
             if (percentLabel) percentLabel.innerText = Math.round(pdfScale * 100) + '%';
         }
 
+        // Advanced Drag to Scroll (Panning) setup with custom mouse grabbing
         function setupGrabScroll() {
             const container = document.getElementById('pdf-viewer-container');
             if (!container) return;
@@ -1636,27 +1663,27 @@
             let scrollLeft, scrollTop;
 
             container.addEventListener('mousedown', (e) => {
+                if (e.button !== 0) return; // Only left click
                 isDown = true;
-                container.classList.add('active');
-                startX = e.pageX - container.offsetLeft;
-                startY = e.pageY - container.offsetTop;
+                container.style.cursor = 'grabbing';
+                startX = e.clientX;
+                startY = e.clientY;
                 scrollLeft = container.scrollLeft;
                 scrollTop = container.scrollTop;
             });
 
-            container.addEventListener('mouseleave', () => {
-                isDown = false;
-            });
-
-            container.addEventListener('mouseup', () => {
-                isDown = false;
+            window.addEventListener('mouseup', () => {
+                if (isDown) {
+                    isDown = false;
+                    container.style.cursor = 'grab';
+                }
             });
 
             container.addEventListener('mousemove', (e) => {
-                if(!isDown) return;
+                if (!isDown) return;
                 e.preventDefault();
-                const x = e.pageX - container.offsetLeft;
-                const y = e.pageY - container.offsetTop;
+                const x = e.clientX;
+                const y = e.clientY;
                 const walkX = (x - startX) * 1.5; 
                 const walkY = (y - startY) * 1.5;
                 container.scrollLeft = scrollLeft - walkX;
@@ -1841,6 +1868,11 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
                 await signInWithEmailAndPassword(auth, email, pass);
                 closeLoginModal();
                 showToast("Đăng nhập vai trò Quản trị viên thành công!", "check");
+                
+                // FORCE ROUTE TO ADMIN WORKSPACE DIRECTLY
+                if (currentView !== 'admin') {
+                    toggleViewMode();
+                }
             } catch(e) {
                 const lErr = document.getElementById('login-error');
                 const lErrText = document.getElementById('login-error-text');
@@ -1856,7 +1888,7 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
                 if (currentView === 'admin') {
                     toggleViewMode(); 
                 }
-                showToast("Đã thoát tài khoản quản trị viên.", "check");
+                showToast("Đăng xuất tài khoản quản trị thành công.", "check");
             } catch(e) {
                 showToast("Lỗi khi đăng xuất: " + e.message, "alert");
             }
@@ -2019,6 +2051,8 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
                     await addDoc(articlesCol, newArticle);
                     showToast("Tạo mới tài liệu hỗ trợ thành công!", "check");
                 }
+                
+                // AUTOMATICALLY DISMISS FORM MODAL UPON SUCCESS
                 closeArticleFormModal();
             } catch(e) {
                 console.error("Save Article Error:", e);
@@ -2159,6 +2193,7 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
         }
 
         // Bind internal scope variables & helper actions safely to global window (DO THIS FIRST)
+        window.getAverageRating = getAverageRating;
         window.goHome = goHome;
         window.toggleViewMode = toggleViewMode;
         window.openLoginModal = openLoginModal;
@@ -2200,6 +2235,7 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
         // Safe initial rendering so offline fallback works seamlessly before auth listener finishes
         renderCategories();
         renderArticles();
+        setupGrabScroll();
     </script>
 </body>
 </html>
