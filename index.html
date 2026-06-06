@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trung tâm Hỗ trợ Kỹ thuật & Xử lý sự cố - Visnam</title>
+    <!-- PREMIUM FAVICON - Đồng bộ 100% với Logo của hệ thống -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='url(%23grad)'/><path d='M28 25 L46 72 L54 72 L72 25 L58 25 L50 58 L42 25 Z' fill='%23ffffff'/><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%230D5392'/><stop offset='100%25' stop-color='%2300A3E0'/></linearGradient></defs></svg>">
+    
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -99,7 +102,7 @@
     <header class="bg-white/95 border-b border-slate-100 sticky top-0 z-40 shadow-sm backdrop-blur-md shrink-0">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-12 md:h-14">
-                <!-- LOGO & BRAND (Favicon Styled block) -->
+                <!-- LOGO & BRAND (Identical to Favicon design) -->
                 <div class="flex items-center space-x-2.5 cursor-pointer" onclick="goHome()">
                     <div class="w-8 h-8 md:w-9 md:h-9 bg-gradient-to-tr from-visnam-primary to-visnam-secondary rounded-lg flex items-center justify-center text-white font-extrabold text-lg shadow-md transform hover:scale-105 transition duration-200 select-none">
                         V
@@ -182,7 +185,7 @@
         
         <!-- CLIENT/GUEST VIEW -->
         <div id="client-view" class="fade-transition flex-grow flex flex-col justify-between">
-            <!-- COMPACT HERO SEARCH BANNER -->
+            <!-- COMPACT HERO SEARCH BANNER (Autofill fixed with correct attributes) -->
             <section class="bg-gradient-to-r from-visnam-primary to-brand-800 text-white py-6 px-4 relative overflow-hidden shrink-0">
                 <div class="absolute inset-0 bg-grid-white/[0.04] bg-[size:16px_16px]"></div>
                 <div class="absolute -top-16 -left-16 w-64 h-64 bg-visnam-secondary rounded-full opacity-10 blur-3xl"></div>
@@ -197,12 +200,12 @@
                         Visnam đồng hành cùng doanh nghiệp trong hành trình chuyển đổi số bằng hệ sinh thái công nghệ toàn diện và tối ưu. Chúng tôi giúp đơn giản hóa quy trình quản lý, nâng cao hiệu quả vận hành và thúc đẩy tăng trưởng bền vững.
                     </p>
                     
-                    <!-- Compact Search Box -->
+                    <!-- Compact Search Box (Protected against username/password autofills) -->
                     <div class="relative max-w-xl mx-auto bg-white rounded-xl p-1 shadow-md flex items-center">
                         <div class="flex items-center pl-3 pr-1 text-slate-400">
                             <i data-lucide="search" class="w-4 h-4"></i>
                         </div>
-                        <input type="text" id="main-search" oninput="handleSearch(this.value)" placeholder="Nhập tên lỗi, mã lỗi hoặc từ khóa (ví dụ: 'Token', 'Java')...." class="w-full py-1.5 px-1 text-slate-800 focus:outline-none placeholder:text-slate-400 text-xs rounded-lg">
+                        <input type="search" id="visnam-main-search" name="visnam_support_query" autocomplete="off" oninput="handleSearch(this.value)" placeholder="Nhập tên lỗi, mã lỗi hoặc từ khóa (ví dụ: 'Token', 'Java')...." class="w-full py-1.5 px-1 text-slate-800 focus:outline-none placeholder:text-slate-400 text-xs rounded-lg">
                         <button onclick="triggerSearch()" class="bg-gradient-to-r from-visnam-primary to-visnam-secondary text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:opacity-90 transition shrink-0 shadow-sm">
                             <span>Tìm ngay</span>
                         </button>
@@ -444,6 +447,7 @@
                 <!-- Company Bio -->
                 <div class="space-y-2">
                     <div class="flex items-center space-x-2.5">
+                        <!-- Identical Icon Logo to keep brand unified -->
                         <div class="w-8 h-8 bg-gradient-to-tr from-visnam-primary to-visnam-secondary rounded-lg flex items-center justify-center text-white font-black text-lg">
                             V
                         </div>
@@ -468,7 +472,6 @@
                         </li>
                         <li class="flex items-center space-x-2">
                             <i data-lucide="mail" class="w-3.5 h-3.5 text-visnam-secondary shrink-0"></i>
-                            <!-- Updated Footer Contact Email -->
                             <span>kinhdoanh@visnam.com</span>
                         </li>
                     </ul>
@@ -509,7 +512,7 @@
     </footer>
 
 
-    <!-- MODAL 1: VIEW INSTRUCTION & SIMULATED MULTI-PAGE PDF (ALWAYS ENFORCING UNIFIED A4 STYLE - REMOVED OLD CHECKLIST PAGE) -->
+    <!-- MODAL 1: VIEW INSTRUCTION & SIMULATED MULTI-PAGE PDF (ALWAYS ENFORCING UNIFIED A4 STYLE) -->
     <div id="view-article-modal" class="hidden fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-2 sm:p-4">
         <!-- Backdrop Blur and Dim -->
         <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm transition-opacity" onclick="closeArticleModal()"></div>
@@ -556,7 +559,7 @@
             <!-- Modal Content - Split layout -->
             <div class="flex-grow flex flex-col lg:flex-row overflow-hidden bg-slate-950">
                 
-                <!-- Left panel: Simulated PDF Viewport (Clean, no checkboxes, support click & drag scroll) -->
+                <!-- Left panel: Simulated PDF Viewport (Clean, support click & drag scroll) -->
                 <div class="flex-grow flex flex-col h-full overflow-hidden relative">
                     <div id="pdf-viewer-container" class="flex-grow p-6 overflow-auto pdf-scrollbar flex flex-col items-center space-y-6 grab-scroll bg-slate-800">
                         <!-- Simulated Page Wrapper with dynamic Zoom scaling -->
@@ -590,19 +593,19 @@
 
                                         <div class="space-y-3">
                                             <h3 class="text-xs font-black text-slate-900 uppercase border-b border-slate-200 pb-1">CÁC BƯỚC HƯỚNG DẪN CHI TIẾT:</h3>
-                                            <div id="pdf-steps-plain" class="text-xs leading-relaxed text-slate-700 space-y-2 whitespace-pre-line font-medium">
+                                            <div id="pdf-steps-plain" class="text-xs leading-relaxed text-slate-700 space-y-2 whitespace-pre-line font-medium font-sans">
                                                 <!-- Steps styled as clean paragraphs without checkboxes -->
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Official footer warning space -->
+                                <!-- Official footer stamp space -->
                                 <div class="mt-8 pt-4 border-t border-slate-100 flex justify-between items-center text-[8px] text-slate-400">
                                     <p>Tổng đài Hỗ trợ Kỹ thuật: 1900 6134</p>
-                                    <div class="text-center shrink-0">
+                                    <div class="text-center shrink-0 animate-in fade-in zoom-in duration-300">
                                         <p class="text-[10px] font-bold text-slate-700 uppercase">KỸ THUẬT NGHIỆP VỤ VISNAM</p>
-                                        <div class="w-24 h-12 bg-red-50 border border-red-100 text-red-500 text-[9px] flex items-center justify-center font-black rounded transform -rotate-3 mx-auto mt-2">
+                                        <div class="w-24 h-12 bg-red-50 border border-red-100 text-red-500 text-[9px] flex items-center justify-center font-black rounded transform -rotate-3 mx-auto mt-2 select-none">
                                             VISNAM APPROVED
                                         </div>
                                     </div>
@@ -686,7 +689,7 @@
     </div>
 
 
-    <!-- MODAL 2: ADMIN LOGIN (With clean Inputs, Enter click, and Security) -->
+    <!-- MODAL 2: ADMIN LOGIN (With clean Inputs, Enter click, and Security Isolation) -->
     <div id="login-modal" class="hidden fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeLoginModal()"></div>
 
@@ -696,7 +699,7 @@
             </button>
 
             <div class="text-center mb-5">
-                <div class="w-10 h-10 bg-gradient-to-tr from-visnam-primary to-visnam-secondary rounded-lg flex items-center justify-center text-white font-bold text-xl mx-auto shadow-sm">
+                <div class="w-10 h-10 bg-gradient-to-tr from-visnam-primary to-visnam-secondary rounded-lg flex items-center justify-center text-white font-bold text-xl mx-auto shadow-sm select-none">
                     V
                 </div>
                 <h3 class="text-lg font-extrabold text-slate-900 mt-3">Hệ thống Quản trị Visnam</h3>
@@ -709,20 +712,21 @@
                 <span id="login-error-text">Tài khoản hoặc mật khẩu không đúng.</span>
             </div>
 
-            <div class="space-y-3">
+            <!-- Integrated HTML Form to safely capture Browser Autofill details inside the modal container only -->
+            <form id="visnam-login-form" autocomplete="on" onsubmit="event.preventDefault(); submitLogin();" class="space-y-3">
                 <div>
                     <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Email quản trị</label>
-                    <input type="text" id="login-user" placeholder="Nhập email quản trị..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs focus:outline-none focus:border-visnam-primary" onkeydown="handleLoginKeydown(event)">
+                    <input type="email" id="login-user" name="email" autocomplete="username" required placeholder="Nhập email quản trị..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs focus:outline-none focus:border-visnam-primary">
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mật khẩu</label>
-                    <input type="password" id="login-pass" placeholder="Nhập mật khẩu..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs focus:outline-none focus:border-visnam-primary" onkeydown="handleLoginKeydown(event)">
+                    <input type="password" id="login-pass" name="password" autocomplete="current-password" required placeholder="Nhập mật khẩu..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 text-xs focus:outline-none focus:border-visnam-primary">
                 </div>
-                <button onclick="submitLogin()" class="w-full bg-gradient-to-r from-visnam-primary to-visnam-secondary text-white font-bold py-2.5 px-4 rounded-xl hover:opacity-95 transition shadow-md flex items-center justify-center space-x-2">
+                <button type="submit" class="w-full bg-gradient-to-r from-visnam-primary to-visnam-secondary text-white font-bold py-2.5 px-4 rounded-xl hover:opacity-95 transition shadow-md flex items-center justify-center space-x-2">
                     <i data-lucide="log-in" class="w-4 h-4"></i>
                     <span>Xác thực đăng nhập</span>
                 </button>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -1224,7 +1228,7 @@
                                 <span class="bg-slate-100 text-slate-700 text-[9px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">${art.category}</span>
                                 <span class="text-slate-400 text-xs flex items-center space-x-1">
                                     <i data-lucide="eye" class="w-3.5 h-3.5"></i>
-                                    <span class="text-[11px]">${art.views}</span>
+                                    <span class="text-[11px]">${art.views || 0}</span>
                                 </span>
                             </div>
 
@@ -1242,7 +1246,7 @@
                             <div class="flex items-center space-x-1 text-amber-500 font-bold">
                                 <span>★</span>
                                 <span class="text-slate-700 text-[11px]">${avgRating}</span>
-                                <span class="text-[10px] text-slate-400 font-normal">(${art.ratings.length})</span>
+                                <span class="text-[10px] text-slate-400 font-normal">(${art.ratings ? art.ratings.length : 0})</span>
                             </div>
 
                             <button onclick="viewArticleDetails('${art.id}')" class="text-xs font-bold text-visnam-primary group-hover:text-visnam-secondary flex items-center space-x-1 transition">
@@ -1259,7 +1263,7 @@
             lucide.createIcons();
         }
 
-        // Render Pagination Control buttons (Extremely compact and stable chevron layout)
+        // Render Pagination Control buttons
         function renderPaginationControls(totalPages) {
             const paginationContainer = document.getElementById('pagination-controls');
             if (!paginationContainer) return;
@@ -1306,9 +1310,8 @@
             renderAdminDashboard();
         }
 
-        // Render Admin Portal Data and lists (Updated with Admin Search and Tables limitation)
+        // Render Admin Portal Data and lists
         function renderAdminDashboard() {
-            // Update counts stats
             const sTotalArticles = document.getElementById('stat-total-articles');
             const sTotalCategories = document.getElementById('stat-total-categories');
             const sTotalViews = document.getElementById('stat-total-views');
@@ -1336,7 +1339,6 @@
             // Render Articles Table
             const tbody = document.getElementById('admin-articles-tbody');
             if (tbody) {
-                // Filter list in admin workspace based on fast search
                 const query = adminSearchQuery.toLowerCase().trim();
                 const filteredAdminArticles = articles.filter(art => {
                     return query === "" || 
@@ -1434,10 +1436,9 @@
             lucide.createIcons();
 
             try {
-                // Load PDF Document safely via PDF.js promise
                 const loadingTask = pdfjsLib.getDocument(pdfUrl);
                 const pdf = await loadingTask.promise;
-                container.innerHTML = ''; // Empty loader
+                container.innerHTML = ''; 
 
                 // Render each page into separate beautifully branded A4 boxes
                 for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
@@ -1480,6 +1481,7 @@
                     };
                     await page.render(renderContext).promise;
                 }
+                lucide.createIcons();
             } catch (error) {
                 console.error("Native PDF.js Render Failure: ", error);
                 container.innerHTML = `
@@ -1499,7 +1501,7 @@
             if (!article) return;
 
             activeArticleIdForView = id;
-            pdfScale = 1.0; // Reset zoom
+            pdfScale = 1.0; 
 
             // Increment views on cloud instantly matching instructions
             try {
@@ -1531,7 +1533,7 @@
             if (pFileNameText) pFileNameText.innerText = article.pdfFileName || "tai-lieu-huong-dan-visnam.pdf";
 
             if (metaCategory) metaCategory.innerText = article.category;
-            if (metaViews) metaViews.innerText = (article.views || 0) + " lượt";
+            if (metaViews) metaViews.innerText = ((article.views || 0) + 1) + " lượt";
             if (metaRating) metaRating.innerText = "⭐ " + getAverageRating(article.ratings) + " (" + (article.ratings ? article.ratings.length : 0) + ")";
 
             const pageMock = document.getElementById('pdf-page-mock');
@@ -1561,6 +1563,7 @@
 
             if (modal) modal.classList.remove('hidden');
             document.body.classList.add('overflow-hidden');
+            lucide.createIcons();
         }
 
         // Zoom In / Zoom Out Features
@@ -1785,7 +1788,6 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
             }
 
             try {
-                // Sign in with authentic Firebase Auth
                 await signInWithEmailAndPassword(auth, email, pass);
                 closeLoginModal();
                 showToast("Đăng nhập vai trò Quản trị viên thành công!", "check");
@@ -1801,7 +1803,6 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
         async function logoutAdmin() {
             try {
                 await signOut(auth);
-                // Return back to client view upon logging out
                 if (currentView === 'admin') {
                     toggleViewMode(); 
                 }
@@ -2008,7 +2009,7 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
         }
 
         function setQuickSearch(word) {
-            const searchBox = document.getElementById('main-search');
+            const searchBox = document.getElementById('visnam-main-search');
             if (searchBox) searchBox.value = word;
             currentSearchQuery = word;
             currentPage = 1;
@@ -2020,7 +2021,7 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
             currentFilterCategory = "Tất cả";
             currentSearchQuery = "";
             currentPage = 1;
-            const searchBox = document.getElementById('main-search');
+            const searchBox = document.getElementById('visnam-main-search');
             if (searchBox) searchBox.value = "";
             renderCategories();
             renderArticles();
@@ -2067,7 +2068,6 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
                     await deleteDoc(oldDocRef);
                     await setDoc(newDocRef, { name: trimmed });
 
-                    // Cascade changes to articles under this category
                     const affectedArticles = articles.filter(art => art.category === oldName);
                     for (let art of affectedArticles) {
                         const artDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', art.id);
