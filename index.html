@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trung tâm Hỗ trợ Kỹ thuật & Xử lý sự cố - Visnam</title>
     <!-- PREMIUM FAVICON - Đồng bộ 100% với Logo của hệ thống -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='url(%23grad)'/><path d='M28 25 L46 72 L54 72 L72 25 L58 25 L50 58 L42 25 Z' fill='%23ffffff'/><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%230D5392'/><stop offset='100%25' stop-color='%2300A3E0'/></linearGradient></defs></svg>">
+    <link class="visnam-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='url(%23grad)'/><path d='M28 25 L46 72 L54 72 L72 25 L58 25 L50 58 L42 25 Z' fill='%23ffffff'/><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%230D5392'/><stop offset='100%25' stop-color='%2300A3E0'/></linearGradient></defs></svg>">
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -824,6 +824,13 @@
         import { getAuth, signInWithCustomToken, signInAnonymously, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Helper function to calculate average rating of an article
+        function getAverageRating(ratings) {
+            if (!ratings || ratings.length === 0) return "5.0";
+            const sum = ratings.reduce((acc, cur) => acc + cur, 0);
+            return (sum / ratings.length).toFixed(1);
+        }
+
         // Firebase Credentials Provided by the User
         const firebaseConfig = {
             apiKey: "AIzaSyBxVjCofmTO3C6IZDynA91UUWZ6iEvj-RY",
@@ -940,10 +947,11 @@
                     await signInAnonymously(auth);
                 }
             } catch (error) {
-                console.error("Firebase Authentication configuration error:", error);
                 // Graceful handling to prevent runtime module halts
                 if (error.code === 'auth/configuration-not-found') {
                     console.warn("Anonymous login is disabled on this Firebase project. Offline fallback active.");
+                } else {
+                    console.warn("Firebase Auth Error caught gracefully:", error.message);
                 }
             }
         };
@@ -990,10 +998,10 @@
                         seedDefaultCategories();
                     }
                 }, (error) => {
-                    console.error("Categories Sync Error:", error);
+                    console.warn("Categories Sync Offline / Warning:", error.message);
                 });
             } catch (e) {
-                console.error("Categories subscription failed:", e);
+                console.warn("Categories subscription failed:", e.message);
             }
         }
 
@@ -1019,10 +1027,10 @@
                         seedDefaultArticles();
                     }
                 }, (error) => {
-                    console.error("Articles Sync Error:", error);
+                    console.warn("Articles Sync Offline / Warning:", error.message);
                 });
             } catch (e) {
-                console.error("Articles subscription failed:", e);
+                console.warn("Articles subscription failed:", e.message);
             }
         }
 
@@ -2150,14 +2158,7 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
             }
         }
 
-        // Initialize Anonymous Auth to execute rules safely
-        initAuth();
-
-        // Safe initial rendering so offline fallback works seamlessly before auth listener finishes
-        renderCategories();
-        renderArticles();
-
-        // Bind internal scope variables & helper actions safely to global window
+        // Bind internal scope variables & helper actions safely to global window (DO THIS FIRST)
         window.goHome = goHome;
         window.toggleViewMode = toggleViewMode;
         window.openLoginModal = openLoginModal;
@@ -2192,6 +2193,13 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
         window.handleLoginKeydown = handleLoginKeydown;
         window.handleAdminSearch = handleAdminSearch;
         window.changePage = changePage;
+
+        // Initialize Anonymous Auth to execute rules safely
+        initAuth();
+
+        // Safe initial rendering so offline fallback works seamlessly before auth listener finishes
+        renderCategories();
+        renderArticles();
     </script>
 </body>
 </html>
