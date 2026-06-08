@@ -105,7 +105,7 @@
             <div class="flex justify-between items-center h-12 md:h-14">
                 <!-- LOGO & BRAND (Logo on top of Subtitle, No VISNAM text) -->
                 <div class="flex flex-col items-start cursor-pointer select-none py-1" onclick="goHome()">
-                    <img src="logo-visnam.png" alt="Visnam Logo" class="h-5 md:h-6 object-contain mb-0.5" onerror="this.outerHTML='<div class=\'w-6 h-6 bg-gradient-to-tr from-[#0D5392] to-[#00A3E0] rounded-lg flex items-center justify-center text-white font-extrabold text-xs shadow-md\'>V</div>'">
+                    <img src="logo-visnam.png" alt="Visnam Logo" class="h-5 md:h-6 object-contain mb-0.5" onerror="this.outerHTML='<div class=\'w-8 h-8 md:w-9 md:h-9 bg-gradient-to-tr from-[#0D5392] to-[#00A3E0] rounded-lg flex items-center justify-center text-white font-extrabold text-xs shadow-md\'>V</div>'">
                     <div class="flex items-center space-x-1.5">
                         <p class="text-[8px] text-slate-400 uppercase tracking-widest font-bold">Hệ thống xử lý sự cố</p>
                         <span class="text-[7px] px-1 py-0.2 bg-visnam-accent text-white font-bold rounded">SUPPORT</span>
@@ -881,6 +881,10 @@
         import { getAuth, signInWithCustomToken, signInAnonymously, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Globalized variable to ensure safe Firestore queries & avoid scoping ReferenceError (Declared at top-level scope)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        window.appId = appId;
+
         // Helper function to calculate average rating of an article
         function getAverageRating(ratings) {
             if (!ratings || ratings.length === 0) return "5.0";
@@ -998,10 +1002,6 @@
             appId: "1:651625894464:web:b63d52413b5d278f2705a5",
             measurementId: "G-B6N72RHYC2"
         };
-
-        // Globalized variable to ensure safe Firestore queries & avoid scoping ReferenceError
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        window.appId = appId;
 
         // Initialize Firebase services safely
         let app, auth, db, articlesCol, categoriesCol;
@@ -1787,6 +1787,7 @@
             }
         }
 
+        // Reset Zoom
         function resetZoom() {
             pdfScale = 1.0;
             updatePdfZoom();
