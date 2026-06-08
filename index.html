@@ -103,15 +103,12 @@
     <header class="bg-white/95 border-b border-slate-100 sticky top-0 z-40 shadow-sm backdrop-blur-md shrink-0">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-12 md:h-14">
-                <!-- LOGO & BRAND -->
-                <div class="flex items-center space-x-2.5 cursor-pointer" onclick="goHome()">
-                    <img src="logo-visnam.png" alt="Visnam Logo" class="h-8 md:h-9 object-contain" onerror="this.outerHTML='<div class=\'w-8 h-8 md:w-9 md:h-9 bg-gradient-to-tr from-[#0D5392] to-[#00A3E0] rounded-lg flex items-center justify-center text-white font-extrabold text-lg shadow-md\'><span class=\'select-none\'>V</span></div>'">
-                    <div>
-                        <div class="flex items-center space-x-1">
-                            <span class="text-sm md:text-base font-black tracking-wider text-visnam-primary">VISNAM</span>
-                            <span class="text-[8px] px-1.5 py-0.2 bg-visnam-accent text-white font-bold rounded">SUPPORT</span>
-                        </div>
+                <!-- LOGO & BRAND (Logo on top of Subtitle, No VISNAM text) -->
+                <div class="flex flex-col items-start cursor-pointer select-none py-1" onclick="goHome()">
+                    <img src="logo-visnam.png" alt="Visnam Logo" class="h-5 md:h-6 object-contain mb-0.5" onerror="this.outerHTML='<div class=\'w-6 h-6 bg-gradient-to-tr from-[#0D5392] to-[#00A3E0] rounded-lg flex items-center justify-center text-white font-extrabold text-xs shadow-md\'>V</div>'">
+                    <div class="flex items-center space-x-1.5">
                         <p class="text-[8px] text-slate-400 uppercase tracking-widest font-bold">Hệ thống xử lý sự cố</p>
+                        <span class="text-[7px] px-1 py-0.2 bg-visnam-accent text-white font-bold rounded">SUPPORT</span>
                     </div>
                 </div>
 
@@ -251,9 +248,9 @@
                                     <i data-lucide="download-cloud" class="w-3.5 h-3.5"></i>
                                     <span>Tải Ultraviewer (Bản Gốc)</span>
                                 </a>
-                                <a href="tel:19006134" class="w-full bg-visnam-accent text-white text-[10px] font-black py-2 px-3 rounded-lg flex items-center justify-center space-x-1.5 hover:bg-orange-600 transition shadow">
-                                    <i data-lucide="phone-call" class="w-3.5 h-3.5 animate-pulse"></i>
-                                    <span>Tổng đài: 1900 6134</span>
+                                <a href="https://zalo.me/s/2332738582622777725/" target="_blank" class="w-full bg-visnam-accent text-white text-[10px] font-black py-2 px-3 rounded-lg flex items-center justify-center space-x-1.5 hover:bg-orange-600 transition shadow">
+                                    <i data-lucide="message-square" class="w-3.5 h-3.5 animate-pulse"></i>
+                                    <span>Liên hệ Zalo OA</span>
                                 </a>
                             </div>
                         </div>
@@ -445,9 +442,8 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <!-- Company Bio -->
                 <div class="space-y-2">
-                    <div class="flex items-center space-x-2.5">
+                    <div class="flex items-center select-none cursor-pointer" onclick="goHome()">
                         <img src="logo-visnam.png" alt="Visnam Logo" class="h-8 object-contain" onerror="this.outerHTML='<div class=\'w-8 h-8 bg-gradient-to-tr from-[#0D5392] to-[#00A3E0] rounded-lg flex items-center justify-center text-white font-extrabold text-lg shadow-md\'><span class=\'select-none\'>V</span></div>'">
-                        <span class="text-sm font-extrabold text-white tracking-wider">VISNAM</span>
                     </div>
                     <p class="text-[11px] text-slate-400 leading-relaxed">
                         Công ty Cổ phần Thương mại Visnam là đơn vị cung cấp các giải pháp chuyển đổi số hàng đầu: Chữ ký số, Hóa đơn điện tử, Phần mềm kế toán và hỗ trợ nghiệp vụ Thuế toàn diện cho doanh nghiệp.
@@ -1637,9 +1633,9 @@
             lucide.createIcons();
 
             try {
-                // Triệt để xử lý hiển thị tệp PDF blob / base64 bằng bộ chuyển đổi nhị phân
+                // Triệt độ xử lý hiển thị tệp PDF blob / base64 bằng bộ chuyển đổi nhị phân
                 const pdfData = convertDataURIToBinary(pdfUrl);
-                const loadingTask = pdfjsLib.getDocument(pdfData);
+                const loadingTask = pdfjsLib.getDocument({ data: pdfData });
                 const pdf = await loadingTask.promise;
                 container.innerHTML = ''; 
 
@@ -1708,12 +1704,19 @@
 
             // Increment views on cloud instantly matching instructions
             try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', id);
-                await updateDoc(docRef, {
-                    views: (article.views || 0) + 1
-                });
+                if (db) {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', id);
+                    await updateDoc(docRef, {
+                        views: (article.views || 0) + 1
+                    });
+                } else {
+                    article.views = (article.views || 0) + 1;
+                    renderArticles();
+                }
             } catch(e) {
                 console.warn("View counter Firestore sync bypassed:", e);
+                article.views = (article.views || 0) + 1;
+                renderArticles();
             }
 
             const modal = document.getElementById('view-article-modal');
@@ -1952,10 +1955,14 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
             const newRatings = [...currentRatings, selectedStarFeedback];
 
             try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', article.id);
-                await updateDoc(docRef, {
-                    ratings: newRatings
-                });
+                if (db) {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', article.id);
+                    await updateDoc(docRef, {
+                        ratings: newRatings
+                    });
+                } else {
+                    article.ratings = newRatings;
+                }
                 showToast("Đã ghi nhận đánh giá hữu ích thành công!", "check");
                 resetFeedbackStarsState();
                 
@@ -2174,19 +2181,54 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
             }
 
             try {
-                if (editId) {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', editId);
-                    await updateDoc(docRef, {
-                        title,
-                        category,
-                        summary,
-                        content,
-                        pdfBlobUrl: temporaryPdfBlobUrl || "",
-                        pdfFileName: temporaryPdfFileName || (title.toLowerCase().replace(/[^a-z0-9]/g, '-') + '.pdf')
-                    });
-                    showToast("Cập nhật tài liệu hỗ trợ thành công!", "check");
+                if (db) {
+                    if (editId) {
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', editId);
+                        await updateDoc(docRef, {
+                            title,
+                            category,
+                            summary,
+                            content,
+                            pdfBlobUrl: temporaryPdfBlobUrl || "",
+                            pdfFileName: temporaryPdfFileName || (title.toLowerCase().replace(/[^a-z0-9]/g, '-') + '.pdf')
+                        });
+                    } else {
+                        const newArticle = {
+                            title,
+                            category,
+                            summary,
+                            content,
+                            pdfBlobUrl: temporaryPdfBlobUrl || "",
+                            pdfFileName: temporaryPdfFileName || (title.toLowerCase().replace(/[^a-z0-9]/g, '-') + '.pdf'),
+                            views: 0,
+                            ratings: [5],
+                            date: new Date().toISOString().split('T')[0]
+                        };
+                        await addDoc(articlesCol, newArticle);
+                    }
+                    showToast("Cập nhật dữ liệu thành công!", "check");
                 } else {
+                    throw new Error("Không kết nối được cơ sở dữ liệu");
+                }
+            } catch(e) {
+                // Local Fallback logic if cloud configuration throws an error
+                if (editId) {
+                    const idx = articles.findIndex(a => a.id === editId);
+                    if (idx !== -1) {
+                        articles[idx] = {
+                            ...articles[idx],
+                            title,
+                            category,
+                            summary,
+                            content,
+                            pdfBlobUrl: temporaryPdfBlobUrl || articles[idx].pdfBlobUrl || "",
+                            pdfFileName: temporaryPdfFileName || articles[idx].pdfFileName || (title.toLowerCase().replace(/[^a-z0-9]/g, '-') + '.pdf')
+                        };
+                    }
+                } else {
+                    const newId = String(Date.now());
                     const newArticle = {
+                        id: newId,
                         title,
                         category,
                         summary,
@@ -2197,27 +2239,34 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
                         ratings: [5],
                         date: new Date().toISOString().split('T')[0]
                     };
-                    await addDoc(articlesCol, newArticle);
-                    showToast("Tạo mới tài liệu hỗ trợ thành công!", "check");
+                    articles.push(newArticle);
                 }
-                
-                // AUTOMATICALLY DISMISS FORM MODAL UPON SUCCESS
-                closeArticleFormModal();
-            } catch(e) {
-                console.error("Save Article Error:", e);
-                showToast("Lỗi lưu dữ liệu: " + e.message, "alert");
+                renderCategories();
+                renderArticles();
+                renderAdminDashboard();
+                showToast("Đã lưu cục bộ (Chưa đồng bộ Cloud): " + e.message, "alert");
             }
+            // AUTOMATICALLY DISMISS FORM MODAL UPON SUCCESS
+            closeArticleFormModal();
         }
 
         async function deleteArticle(id) {
             const confirmed = window.confirm("Bạn có chắc chắn muốn xóa tài liệu hướng dẫn này?");
             if (confirmed) {
                 try {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', id);
-                    await deleteDoc(docRef);
-                    showToast("Đã xóa tệp tài liệu thành công.", "check");
+                    if (db) {
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', id);
+                        await deleteDoc(docRef);
+                        showToast("Đã xóa tệp tài liệu thành công.", "check");
+                    } else {
+                        throw new Error("Không kết nối được cơ sở dữ liệu");
+                    }
                 } catch(e) {
-                    showToast("Lỗi xóa dữ liệu: " + e.message, "alert");
+                    articles = articles.filter(a => a.id !== id);
+                    renderCategories();
+                    renderArticles();
+                    renderAdminDashboard();
+                    showToast("Đã xóa cục bộ (Chưa đồng bộ Cloud): " + e.message, "alert");
                 }
             }
         }
@@ -2229,6 +2278,7 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
             showToast("Đã sắp xếp lại danh sách tài liệu", "check");
         }
 
+        // Changed to use window scope directly inside input handlers to prevent execution delays
         function handleSearch(val) {
             currentSearchQuery = val;
             currentPage = 1;
@@ -2299,12 +2349,20 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
             }
 
             try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'categories', name);
-                await setDoc(docRef, { name: name });
-                if (input) input.value = "";
-                showToast("Đã thêm danh mục mới!", "check");
+                if (db) {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'categories', name);
+                    await setDoc(docRef, { name: name });
+                    if (input) input.value = "";
+                    showToast("Đã thêm danh mục mới!", "check");
+                } else {
+                    throw new Error("Không kết nối được cơ sở dữ liệu");
+                }
             } catch(e) {
-                showToast("Lỗi lưu chuyên mục: " + e.message, "alert");
+                categories.push(name);
+                if (input) input.value = "";
+                renderCategories();
+                renderAdminDashboard();
+                showToast("Đã thêm cục bộ (Chưa đồng bộ Cloud): " + e.message, "alert");
             }
         }
 
@@ -2313,21 +2371,37 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
             if (newName && newName.trim() !== "" && newName.trim() !== oldName) {
                 const trimmed = newName.trim();
                 try {
-                    const oldDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'categories', oldName);
-                    const newDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'categories', trimmed);
-                    
-                    await deleteDoc(oldDocRef);
-                    await setDoc(newDocRef, { name: trimmed });
+                    if (db) {
+                        const oldDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'categories', oldName);
+                        const newDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'categories', trimmed);
+                        
+                        await deleteDoc(oldDocRef);
+                        await setDoc(newDocRef, { name: trimmed });
 
-                    const affectedArticles = articles.filter(art => art.category === oldName);
-                    for (let art of affectedArticles) {
-                        const artDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', art.id);
-                        await updateDoc(artDocRef, { category: trimmed });
+                        const affectedArticles = articles.filter(art => art.category === oldName);
+                        for (let art of affectedArticles) {
+                            const artDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', art.id);
+                            await updateDoc(artDocRef, { category: trimmed });
+                        }
+                        showToast("Đã cập nhật tên danh mục thành công!", "check");
+                    } else {
+                        throw new Error("Không kết nối được cơ sở dữ liệu");
                     }
-
-                    showToast("Đã cập nhật tên danh mục thành công!", "check");
                 } catch(e) {
-                    showToast("Lỗi sửa danh mục: " + e.message, "alert");
+                    const idx = categories.indexOf(oldName);
+                    if (idx !== -1) {
+                        categories[idx] = trimmed;
+                    }
+                    articles.forEach(art => {
+                        if (art.category === oldName) art.category = trimmed;
+                    });
+                    if (currentFilterCategory === oldName) {
+                        currentFilterCategory = trimmed;
+                    }
+                    renderCategories();
+                    renderArticles();
+                    renderAdminDashboard();
+                    showToast("Đã sửa cục bộ (Chưa đồng bộ Cloud): " + e.message, "alert");
                 }
             }
         }
@@ -2339,23 +2413,41 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
                 if (!force) return;
 
                 try {
-                    const affectedArticles = articles.filter(art => art.category === catName);
-                    for (let art of affectedArticles) {
-                        const artDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', art.id);
-                        await updateDoc(artDocRef, { category: "Khác" });
+                    if (db) {
+                        const affectedArticles = articles.filter(art => art.category === catName);
+                        for (let art of affectedArticles) {
+                            const artDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'articles', art.id);
+                            await updateDoc(artDocRef, { category: "Khác" });
+                        }
                     }
                 } catch(e) {
-                    showToast("Lỗi cập nhật bài viết: " + e.message, "alert");
-                    return;
+                    articles.forEach(art => {
+                        if (art.category === catName) art.category = "Khác";
+                    });
+                    console.warn("Cascade category update bypassed:", e.message);
                 }
             }
 
             try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'categories', catName);
-                await deleteDoc(docRef);
-                showToast("Đã xóa chuyên mục hỗ trợ thành công.", "check");
+                if (db) {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'categories', catName);
+                    await deleteDoc(docRef);
+                    showToast("Đã xóa chuyên mục hỗ trợ thành công.", "check");
+                } else {
+                    throw new Error("Không kết nối được cơ sở dữ liệu");
+                }
             } catch(e) {
-                showToast("Lỗi xóa danh mục: " + e.message, "alert");
+                categories = categories.filter(c => c !== catName);
+                if (!categories.includes("Khác")) {
+                    categories.push("Khác");
+                }
+                if (currentFilterCategory === catName) {
+                    currentFilterCategory = "Tất cả";
+                }
+                renderCategories();
+                renderArticles();
+                renderAdminDashboard();
+                showToast("Đã xóa cục bộ (Chưa đồng bộ Cloud): " + e.message, "alert");
             }
         }
 
