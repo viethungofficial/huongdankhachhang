@@ -695,6 +695,7 @@
             </button>
 
             <div class="text-center mb-5">
+                <!-- PREMIUM FAVICON / LOGO - Đồng bộ hoàn toàn -->
                 <svg class="w-10 h-10 mx-auto mb-3 shadow-md rounded-lg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                     <rect width="100" height="100" rx="24" fill="url(#modalLogoGrad)"/>
                     <path d="M25 30 L45 75 C47 80, 53 80, 55 75 L75 30 L62 30 L50 60 L38 30 Z" fill="#ffffff"/>
@@ -716,6 +717,7 @@
                 <span id="login-error-text">Tài khoản hoặc mật khẩu không đúng.</span>
             </div>
 
+            <!-- Integrated HTML Form to safely capture Browser Autofill details inside the modal container only -->
             <form id="visnam-login-form" autocomplete="on" onsubmit="event.preventDefault(); submitLogin();" class="space-y-3">
                 <div>
                     <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Email quản trị</label>
@@ -734,7 +736,7 @@
     </div>
 
 
-    <!-- MODAL 3: ADD/EDIT ARTICLE -->
+    <!-- MODAL 3: ADD/EDIT ARTICLE (ADMIN ONLY) - NON-MANDATORY FIELDS -->
     <div id="article-form-modal" class="hidden fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeArticleFormModal()"></div>
 
@@ -1001,13 +1003,16 @@
             measurementId: "G-B6N72RHYC2"
         };
 
+        // Globalized variable to ensure safe Firestore queries & avoid scoping ReferenceError
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        window.appId = appId;
+
         // Initialize Firebase services safely
         let app, auth, db, articlesCol, categoriesCol;
         try {
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             articlesCol = collection(db, 'artifacts', appId, 'public', 'data', 'articles');
             categoriesCol = collection(db, 'artifacts', appId, 'public', 'data', 'categories');
         } catch (e) {
