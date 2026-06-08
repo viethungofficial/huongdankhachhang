@@ -103,19 +103,9 @@
     <header class="bg-white/95 border-b border-slate-100 sticky top-0 z-40 shadow-sm backdrop-blur-md shrink-0">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-12 md:h-14">
-                <!-- LOGO & BRAND (Identical to Favicon design) -->
+                <!-- LOGO & BRAND -->
                 <div class="flex items-center space-x-2.5 cursor-pointer" onclick="goHome()">
-                    <svg class="w-8 h-8 md:w-9 md:h-9 transform hover:scale-105 transition duration-200 select-none shrink-0" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="100" height="100" rx="24" fill="url(#headerGrad)"/>
-                        <path d="M25 30 L45 75 C47 80, 53 80, 55 75 L75 30 L62 30 L50 60 L38 30 Z" fill="#ffffff"/>
-                        <circle cx="50" cy="32" r="6" fill="#F25F22"/>
-                        <defs>
-                            <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#0D5392"/>
-                                <stop offset="100%" stop-color="#00A3E0"/>
-                            </linearGradient>
-                        </defs>
-                    </svg>
+                    <img src="logo-visnam.png" alt="Visnam Logo" class="h-8 md:h-9 object-contain" onerror="this.outerHTML='<div class=\'w-8 h-8 md:w-9 md:h-9 bg-gradient-to-tr from-[#0D5392] to-[#00A3E0] rounded-lg flex items-center justify-center text-white font-extrabold text-lg shadow-md\'><span class=\'select-none\'>V</span></div>'">
                     <div>
                         <div class="flex items-center space-x-1">
                             <span class="text-sm md:text-base font-black tracking-wider text-visnam-primary">VISNAM</span>
@@ -394,7 +384,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Table Container (With custom scrollbar and max height) -->
+                                <!-- Table Container -->
                                 <div class="overflow-x-auto max-h-[420px] pdf-scrollbar">
                                     <table class="w-full text-left text-xs relative">
                                         <thead class="bg-slate-100 text-slate-600 uppercase font-bold tracking-wider sticky top-0 z-10">
@@ -456,19 +446,8 @@
                 <!-- Company Bio -->
                 <div class="space-y-2">
                     <div class="flex items-center space-x-2.5">
-                        <!-- PREMIUM FAVICON / LOGO - Đồng bộ hoàn toàn -->
-                        <svg class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="100" height="100" rx="24" fill="url(#footerGrad)"/>
-                            <path d="M25 30 L45 75 C47 80, 53 80, 55 75 L75 30 L62 30 L50 60 L38 30 Z" fill="#ffffff"/>
-                            <circle cx="50" cy="32" r="6" fill="#F25F22"/>
-                            <defs>
-                                <linearGradient id="footerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#0D5392"/>
-                                    <stop offset="100%" stop-color="#00A3E0"/>
-                                </linearGradient>
-                            </defs>
-                        </svg>
-                        <span class="text-sm font-extrabold text-white tracking-wider">VISNAM COMMERCE</span>
+                        <img src="logo-visnam.png" alt="Visnam Logo" class="h-8 object-contain" onerror="this.outerHTML='<div class=\'w-8 h-8 bg-gradient-to-tr from-[#0D5392] to-[#00A3E0] rounded-lg flex items-center justify-center text-white font-extrabold text-lg shadow-md\'><span class=\'select-none\'>V</span></div>'">
+                        <span class="text-sm font-extrabold text-white tracking-wider">VISNAM</span>
                     </div>
                     <p class="text-[11px] text-slate-400 leading-relaxed">
                         Công ty Cổ phần Thương mại Visnam là đơn vị cung cấp các giải pháp chuyển đổi số hàng đầu: Chữ ký số, Hóa đơn điện tử, Phần mềm kế toán và hỗ trợ nghiệp vụ Thuế toàn diện cho doanh nghiệp.
@@ -502,9 +481,9 @@
                             <i data-lucide="arrow-right" class="w-2.5 h-2.5 text-visnam-secondary"></i>
                             <span>Trang chủ Visnam</span>
                         </a>
-                        <a href="tel:19006134" class="hover:text-white transition flex items-center space-x-1">
+                        <a href="https://zalo.me/s/2332738582622777725/" target="_blank" class="hover:text-white transition flex items-center space-x-1">
                             <i data-lucide="arrow-right" class="w-2.5 h-2.5 text-visnam-secondary"></i>
-                            <span>Liên hệ hỗ trợ</span>
+                            <span>Liên hệ hỗ trợ Zalo OA</span>
                         </a>
                     </div>
                     <div class="pt-1">
@@ -520,9 +499,9 @@
             <div class="border-t border-slate-800 pt-4 flex flex-col md:flex-row justify-between items-center gap-2 text-[10px]">
                 <p>&copy; 2026 CÔNG TY CỔ PHẦN THƯƠNG MẠI VISNAM. Bảo lưu mọi quyền.</p>
                 <div class="flex space-x-3 text-[10px]">
-                    <a href="#" class="hover:text-white transition">Chính sách bảo mật</a>
+                    <button onclick="openPrivacyModal()" class="hover:text-white transition focus:outline-none">Chính sách bảo mật</button>
                     <span>•</span>
-                    <a href="#" class="hover:text-white transition">Điều khoản dịch vụ</a>
+                    <button onclick="openTermsModal()" class="hover:text-white transition focus:outline-none">Điều khoản sử dụng</button>
                 </div>
             </div>
         </div>
@@ -667,9 +646,9 @@
                                     <i data-lucide="download-cloud" class="w-4 h-4 text-indigo-400"></i>
                                     <span>Tải Ultraviewer từ xa</span>
                                 </a>
-                                <a href="tel:19006134" class="w-full bg-visnam-accent hover:bg-orange-600 text-white text-[11px] font-extrabold py-2.5 px-3 rounded-lg flex items-center justify-center space-x-1.5 transition shadow">
-                                    <i data-lucide="phone" class="w-4 h-4 animate-pulse"></i>
-                                    <span>Gọi 1900 6134</span>
+                                <a href="https://zalo.me/s/2332738582622777725/" target="_blank" class="w-full bg-[#0068ff] hover:bg-[#0056d6] text-white text-[11px] font-extrabold py-2.5 px-3 rounded-lg flex items-center justify-center space-x-1.5 transition shadow">
+                                    <i data-lucide="message-square" class="w-4 h-4"></i>
+                                    <span>Liên hệ qua Zalo OA</span>
                                 </a>
                             </div>
                         </div>
@@ -716,7 +695,6 @@
             </button>
 
             <div class="text-center mb-5">
-                <!-- PREMIUM FAVICON / LOGO - Đồng bộ hoàn toàn -->
                 <svg class="w-10 h-10 mx-auto mb-3 shadow-md rounded-lg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                     <rect width="100" height="100" rx="24" fill="url(#modalLogoGrad)"/>
                     <path d="M25 30 L45 75 C47 80, 53 80, 55 75 L75 30 L62 30 L50 60 L38 30 Z" fill="#ffffff"/>
@@ -738,7 +716,6 @@
                 <span id="login-error-text">Tài khoản hoặc mật khẩu không đúng.</span>
             </div>
 
-            <!-- Integrated HTML Form to safely capture Browser Autofill details inside the modal container only -->
             <form id="visnam-login-form" autocomplete="on" onsubmit="event.preventDefault(); submitLogin();" class="space-y-3">
                 <div>
                     <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Email quản trị</label>
@@ -757,7 +734,7 @@
     </div>
 
 
-    <!-- MODAL 3: ADD/EDIT ARTICLE (ADMIN ONLY) - NON-MANDATORY FIELDS -->
+    <!-- MODAL 3: ADD/EDIT ARTICLE -->
     <div id="article-form-modal" class="hidden fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-3">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeArticleFormModal()"></div>
 
@@ -832,6 +809,62 @@
     </div>
 
 
+    <!-- MODAL 4: PRIVACY POLICY (CHÍNH SÁCH BẢO MẬT) -->
+    <div id="privacy-modal" class="hidden fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm" onclick="closePrivacyModal()"></div>
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden shadow-2xl relative z-10 animate-in fade-in duration-200">
+            <div class="bg-slate-900 text-white p-4 flex justify-between items-center shrink-0">
+                <h3 class="font-extrabold text-sm flex items-center space-x-2">
+                    <i data-lucide="shield" class="text-visnam-secondary w-4 h-4"></i>
+                    <span>Chính sách bảo mật - VISNAM</span>
+                </h3>
+                <button onclick="closePrivacyModal()" class="p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto text-xs text-slate-600 space-y-4 leading-relaxed">
+                <h4 class="font-bold text-slate-900 text-sm border-b pb-1">1. Mục đích thu thập thông tin</h4>
+                <p>VISNAM thu thập thông tin cá nhân của bạn (bao gồm email, số điện thoại, tên tổ chức) khi bạn đăng ký sử dụng cổng hỗ trợ, nộp yêu cầu xử lý lỗi hoặc gửi đánh giá tài liệu. Mục đích duy nhất là để phản hồi và tối ưu hóa hệ thống sửa lỗi từ xa cho quý doanh nghiệp.</p>
+                <h4 class="font-bold text-slate-900 text-sm border-b pb-1">2. Phạm vi sử dụng thông tin</h4>
+                <p>Chúng tôi chỉ sử dụng thông tin trong nội bộ ban kỹ thuật Visnam để liên hệ hỗ trợ nghiệp vụ trực tiếp qua Ultraviewer, Zalo OA hoặc Hotline hỗ trợ. VISNAM cam kết không chia sẻ hoặc cung cấp thông tin này cho bất kỳ bên thứ ba nào.</p>
+                <h4 class="font-bold text-slate-900 text-sm border-b pb-1">3. Bảo mật an toàn dữ liệu số</h4>
+                <p>Dữ liệu yêu cầu hỗ trợ và thông tin doanh nghiệp được lưu trữ và mã hóa an toàn trên hệ thống máy chủ Cloud tiên tiến. Chúng tôi áp dụng quy trình kiểm soát truy cập nghiêm ngặt để đảm bảo an toàn thông tin số doanh nghiệp.</p>
+            </div>
+            <div class="bg-slate-50 p-3 border-t flex justify-end shrink-0">
+                <button onclick="closePrivacyModal()" class="bg-slate-900 text-white font-bold text-xs py-2 px-4 rounded-lg hover:bg-slate-800 transition">Đồng ý & Đóng</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL 5: TERMS OF USE (ĐIỀU KHOẢN SỬ DỤNG) -->
+    <div id="terms-modal" class="hidden fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm" onclick="closeTermsModal()"></div>
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden shadow-2xl relative z-10 animate-in fade-in duration-200">
+            <div class="bg-slate-900 text-white p-4 flex justify-between items-center shrink-0">
+                <h3 class="font-extrabold text-sm flex items-center space-x-2">
+                    <i data-lucide="file-text" class="text-visnam-secondary w-4 h-4"></i>
+                    <span>Điều khoản sử dụng hệ thống - VISNAM</span>
+                </h3>
+                <button onclick="closeTermsModal()" class="p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto text-xs text-slate-600 space-y-4 leading-relaxed">
+                <h4 class="font-bold text-slate-900 text-sm border-b pb-1">1. Quyền sở hữu tài liệu trí tuệ</h4>
+                <p>Toàn bộ tài liệu hướng dẫn nghiệp vụ, quy trình xử lý lỗi chữ ký số, hóa đơn điện tử, phần mềm kế toán trên hệ thống này thuộc quyền sở hữu độc quyền của Công ty Cổ phần Thương mại Visnam. Việc sao chép, phân phối tài liệu cho mục đích thương mại phi pháp là nghiêm cấm.</p>
+                <h4 class="font-bold text-slate-900 text-sm border-b pb-1">2. Trách nhiệm người dùng</h4>
+                <p>Doanh nghiệp có trách nhiệm bảo mật mã số PIN chữ ký số của mình. Các hướng dẫn sửa lỗi trên cổng hỗ trợ mang tính chất định hướng nghiệp vụ thực tế; người dùng cần tuân thủ theo trình tự khuyến cáo hoặc liên hệ Hotline/Zalo OA của chúng tôi nếu gặp vướng mắc kỹ thuật phức tạp.</p>
+                <h4 class="font-bold text-slate-900 text-sm border-b pb-1">3. Giới hạn trách nhiệm pháp lý</h4>
+                <p>VISNAM luôn cố gắng biên soạn các tài liệu hướng dẫn kỹ thuật chính xác nhất. Tuy nhiên, chúng tôi không chịu trách nhiệm đối với các rủi ro hệ thống phát sinh do sự bất cẩn của quý khách trong quá trình tự vận hành máy tính cá nhân mà không tuân thủ chỉ dẫn an toàn thông tin.</p>
+            </div>
+            <div class="bg-slate-50 p-3 border-t flex justify-end shrink-0">
+                <button onclick="closeTermsModal()" class="bg-slate-900 text-white font-bold text-xs py-2 px-4 rounded-lg hover:bg-slate-800 transition">Xác nhận điều khoản</button>
+            </div>
+        </div>
+    </div>
+
+
     <!-- TOAST ALERTS -->
     <div id="toast-notification" class="hidden fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl flex items-center space-x-3 max-w-sm transition-all duration-300 transform translate-y-10 opacity-0">
         <div class="p-1 bg-emerald-500 rounded-full text-white" id="toast-icon-box">
@@ -855,6 +888,65 @@
             if (!ratings || ratings.length === 0) return "5.0";
             const sum = ratings.reduce((acc, cur) => acc + cur, 0);
             return (sum / ratings.length).toFixed(1);
+        }
+
+        // Helper to convert DataURI / Base64 to Binary ArrayBuffer for PDF.js (Fixing PDF blank rendering issue)
+        function convertDataURIToBinary(dataURI) {
+            const base64Marker = ';base64,';
+            const base64Index = dataURI.indexOf(base64Marker);
+            if (base64Index === -1) {
+                return dataURI; // treat as normal URL
+            }
+            const base64 = dataURI.substring(base64Index + base64Marker.length);
+            const raw = window.atob(base64);
+            const rawLength = raw.length;
+            const array = new Uint8Array(new ArrayBuffer(rawLength));
+            for (let i = 0; i < rawLength; i++) {
+                array[i] = raw.charCodeAt(i);
+            }
+            return array;
+        }
+
+        // Helper to map category names to specific colors & styles (Glow/Borders)
+        function getCategoryColorClasses(category) {
+            const cat = category ? category.trim() : "Khác";
+            switch (cat) {
+                case "Chữ ký số":
+                    return {
+                        badge: "bg-blue-50 text-blue-700 border border-blue-200",
+                        glow: "hover:border-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.35)] focus-within:border-blue-500 focus-within:shadow-[0_0_20px_rgba(59,130,246,0.35)]",
+                        accent: "text-blue-600"
+                    };
+                case "Hóa đơn điện tử":
+                    return {
+                        badge: "bg-teal-50 text-teal-700 border border-teal-200",
+                        glow: "hover:border-teal-500 hover:shadow-[0_0_20px_rgba(20,184,166,0.35)] focus-within:border-teal-500 focus-within:shadow-[0_0_20px_rgba(20,184,166,0.35)]",
+                        accent: "text-teal-600"
+                    };
+                case "Phần mềm kế toán":
+                    return {
+                        badge: "bg-indigo-50 text-indigo-700 border border-indigo-200",
+                        glow: "hover:border-indigo-500 hover:shadow-[0_0_20px_rgba(99,102,241,0.35)] focus-within:border-indigo-500 focus-within:shadow-[0_0_20px_rgba(99,102,241,0.35)]",
+                        accent: "text-indigo-600"
+                    };
+                case "Khai thuế & Hải quan":
+                    return {
+                        badge: "bg-orange-50 text-orange-700 border border-orange-200",
+                        glow: "hover:border-orange-500 hover:shadow-[0_0_20px_rgba(249,115,22,0.35)] focus-within:border-orange-500 focus-within:shadow-[0_0_20px_rgba(249,115,22,0.35)]",
+                        accent: "text-orange-600"
+                    };
+                default:
+                    return {
+                        badge: "bg-slate-100 text-slate-700 border border-slate-200",
+                        glow: "hover:border-slate-400 hover:shadow-[0_0_15px_rgba(100,116,139,0.25)] focus-within:border-slate-400 focus-within:shadow-[0_0_15px_rgba(100,116,139,0.25)]",
+                        accent: "text-slate-600"
+                    };
+            }
+        }
+
+        // Setup PDF.js worker
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
         }
 
         // DYNAMIC TOAST UTILITY
@@ -1321,12 +1413,15 @@
             paginatedArticles.forEach(art => {
                 const avgRating = getAverageRating(art.ratings);
                 
+                // Fetch dynamic classes to support hover glowing effects per category
+                const styles = getCategoryColorClasses(art.category);
+
                 html += `
-                    <div class="bg-white rounded-2xl p-5 border border-slate-100 hover:border-slate-200 hover:shadow-lg transition duration-300 flex flex-col justify-between group relative h-[180px]">
+                    <div class="bg-white rounded-2xl p-5 border border-slate-100 transition duration-300 flex flex-col justify-between group relative h-[180px] ${styles.glow}">
                         <div>
                             <!-- Header tags inside card -->
                             <div class="flex justify-between items-center mb-2.5">
-                                <span class="bg-slate-100 text-slate-700 text-[9px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">${art.category}</span>
+                                <span class="text-[9px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider ${styles.badge}">${art.category}</span>
                                 <span class="text-slate-400 text-xs flex items-center space-x-1">
                                     <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                                     <span class="text-[11px]">${art.views || 0}</span>
@@ -1334,7 +1429,7 @@
                             </div>
 
                             <!-- Clickable Title -->
-                            <h3 onclick="viewArticleDetails('${art.id}')" class="text-xs font-extrabold text-slate-900 group-hover:text-visnam-primary cursor-pointer line-clamp-2 transition mb-1.5" title="Xem tài liệu">
+                            <h3 onclick="viewArticleDetails('${art.id}')" class="text-xs font-extrabold text-slate-900 cursor-pointer line-clamp-2 transition mb-1.5 group-hover:${styles.accent}" title="Xem tài liệu">
                                 ${art.title}
                             </h3>
 
@@ -1350,7 +1445,7 @@
                                 <span class="text-[10px] text-slate-400 font-normal">(${art.ratings ? art.ratings.length : 0})</span>
                             </div>
 
-                            <button onclick="viewArticleDetails('${art.id}')" class="text-xs font-bold text-visnam-primary group-hover:text-visnam-secondary flex items-center space-x-1 transition">
+                            <button onclick="viewArticleDetails('${art.id}')" class="text-xs font-bold flex items-center space-x-1 transition ${styles.accent} opacity-80 group-hover:opacity-100">
                                 <span>Xem quy trình</span>
                                 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                             </button>
@@ -1537,7 +1632,9 @@
             lucide.createIcons();
 
             try {
-                const loadingTask = pdfjsLib.getDocument(pdfUrl);
+                // Triệt để xử lý hiển thị tệp PDF blob / base64 bằng bộ chuyển đổi nhị phân
+                const pdfData = convertDataURIToBinary(pdfUrl);
+                const loadingTask = pdfjsLib.getDocument(pdfData);
                 const pdf = await loadingTask.promise;
                 container.innerHTML = ''; 
 
@@ -1549,7 +1646,7 @@
                     pageDiv.className = "bg-white w-full shadow-2xl rounded-sm p-8 sm:p-12 text-slate-800 relative min-h-[850px] flex flex-col justify-between overflow-hidden";
                     
                     pageDiv.innerHTML = `
-                        <div class="border-b border-slate-200 pb-2.5 mb-4 flex justify-between items-start select-none">
+                        <div class="border-b border-slate-200 pb-2.5 mb-4 flex justify-between items-start select-none border-[#0D5392]/20">
                             <div>
                                 <h4 class="text-xs font-black text-visnam-primary tracking-wide">CÔNG TY CỔ PHẦN THƯƠNG MẠI VISNAM</h4>
                                 <p class="text-[8px] text-slate-400 tracking-wider font-semibold">Tài liệu hướng dẫn trực quan đính kèm</p>
@@ -1562,7 +1659,7 @@
                             <!-- Crispy pixel rendering viewport -->
                             <canvas id="pdf-canvas-${pageNum}" class="max-w-full shadow-sm rounded-sm object-contain block select-none h-auto max-h-[750px]"></canvas>
                         </div>
-                        <div class="mt-4 pt-3 border-t border-slate-100 text-center text-[8px] text-slate-400 select-none">
+                        <div class="mt-4 pt-3 border-t border-slate-100 text-center text-[8px] text-slate-400 select-none border-slate-100">
                             <p>Bản quyền thuộc Công Ty Cổ Phần Thương Mại Visnam © 2026</p>
                         </div>
                     `;
@@ -1586,7 +1683,7 @@
             } catch (error) {
                 console.error("Native PDF.js Render Failure: ", error);
                 container.innerHTML = `
-                    <div class="bg-white w-full shadow-2xl rounded-sm p-10 text-center text-red-500">
+                    <div class="bg-white w-full shadow-2xl rounded-sm p-10 text-center text-red-500 min-h-[400px] flex flex-col justify-center items-center">
                         <i data-lucide="alert-triangle" class="w-8 h-8 mx-auto mb-2 text-red-500"></i>
                         <p class="text-xs font-bold">Không thể hiển thị tài liệu PDF đính kèm tự động.</p>
                         <p class="text-[10px] text-slate-500 mt-1">Xin vui lòng click nút "Tải xuống PDF" ở thanh bên phải để đọc trực tiếp.</p>
@@ -2015,18 +2112,24 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
         function handlePDFUpload(input) {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
-                temporaryPdfBlobUrl = URL.createObjectURL(file);
-                temporaryPdfFileName = file.name;
+                const reader = new FileReader();
+                
+                // Sử dụng FileReader để đọc luồng dữ liệu một cách an toàn và tối ưu
+                reader.onload = function(e) {
+                    temporaryPdfBlobUrl = e.target.result;
+                    temporaryPdfFileName = file.name;
 
-                const label = document.getElementById('pdf-file-label');
-                if (label) {
-                    label.innerHTML = `
-                        <i data-lucide="file-check" class="w-4 h-4 text-emerald-600"></i>
-                        <span class="text-emerald-700 font-bold">${file.name}</span>
-                    `;
-                }
-                lucide.createIcons();
-                showToast("Đã đính kèm tệp tin PDF thành công", "check");
+                    const label = document.getElementById('pdf-file-label');
+                    if (label) {
+                        label.innerHTML = `
+                            <i data-lucide="file-check" class="w-4 h-4 text-emerald-600"></i>
+                            <span class="text-emerald-700 font-bold">${file.name} (Tải lên thành công)</span>
+                        `;
+                    }
+                    lucide.createIcons();
+                    showToast("Đã đính kèm tệp tin PDF thành công", "check");
+                };
+                reader.readAsDataURL(file);
             }
         }
 
@@ -2097,7 +2200,7 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
                 closeArticleFormModal();
             } catch(e) {
                 console.error("Save Article Error:", e);
-                showToast("Lỗi phân quyền Firestore: " + e.message, "alert");
+                showToast("Lỗi lưu dữ liệu: " + e.message, "alert");
             }
         }
 
@@ -2109,7 +2212,7 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
                     await deleteDoc(docRef);
                     showToast("Đã xóa tệp tài liệu thành công.", "check");
                 } catch(e) {
-                    showToast("Lỗi xóa Firestore: " + e.message, "alert");
+                    showToast("Lỗi xóa dữ liệu: " + e.message, "alert");
                 }
             }
         }
@@ -2155,6 +2258,24 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
         function toggleMobileMenu() {
             const menu = document.getElementById('mobile-menu');
             if (menu) menu.classList.toggle('hidden');
+        }
+
+        /* MODAL MỞ CHÍNH SÁCH BẢO MẬT & ĐIỀU KHOẢN */
+        function openPrivacyModal() {
+            const modal = document.getElementById('privacy-modal');
+            if (modal) modal.classList.remove('hidden');
+        }
+        function closePrivacyModal() {
+            const modal = document.getElementById('privacy-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+        function openTermsModal() {
+            const modal = document.getElementById('terms-modal');
+            if (modal) modal.classList.remove('hidden');
+        }
+        function closeTermsModal() {
+            const modal = document.getElementById('terms-modal');
+            if (modal) modal.classList.add('hidden');
         }
 
         /* ADMIN INLINE CATEGORY CONTROLLERS */
@@ -2271,6 +2392,10 @@ Hỗ trợ kỹ thuật Visnam Hotline: 1900 6134
         window.handleAdminSearch = handleAdminSearch;
         window.changePage = changePage;
         window.showToast = showToast;
+        window.openPrivacyModal = openPrivacyModal;
+        window.closePrivacyModal = closePrivacyModal;
+        window.openTermsModal = openTermsModal;
+        window.closeTermsModal = closeTermsModal;
 
         // Initialize Anonymous Auth to execute rules safely
         initAuth();
