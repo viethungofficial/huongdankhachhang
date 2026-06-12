@@ -1,1717 +1,1299 @@
 <!DOCTYPE html>
-<html lang="vi" class="">
+<html lang="vi" class="h-full bg-slate-50 scroll-smooth">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PDF Share - Hệ thống quản lý và chia sẻ tài liệu trực tuyến</title>
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontSize: {
-            'xs': '0.75rem',     /* 12px */
-            'sm': '0.8125rem',   /* 13px - chữ nhỏ vừa mắt */
-            'base': '0.875rem',  /* 14px */
-            'lg': '1rem',        /* 16px */
-            'xl': '1.125rem',    /* 18px */
-            '2xl': '1.25rem',    /* 20px */
-          }
-        }
-      }
-    }
-  </script>
-
-  <!-- Google Fonts: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-
-  <!-- PDF.js CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-    }
-    /* Tùy biến thanh cuộn nhỏ gọn */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-    .dark ::-webkit-scrollbar-thumb {
-      background: #475569;
-    }
-  </style>
-</head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 transition-colors duration-200 text-sm flex flex-col min-h-screen overflow-y-scroll">
-
-  <!-- HEADER -->
-  <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 transition-all">
-    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
-      
-      <!-- Logo -->
-      <div class="flex items-center gap-2 cursor-pointer flex-shrink-0" onclick="navigate('home')">
-        <div class="bg-blue-600 text-white p-1.5 rounded-lg shadow-sm">
-          <i data-lucide="file-text" class="w-4 h-4"></i>
-        </div>
-        <div class="flex items-center gap-1">
-          <span class="text-base font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">PDF</span>
-          <span class="text-base font-bold text-slate-800 dark:text-slate-200">Share</span>
-        </div>
-      </div>
-
-      <!-- Tìm kiếm nhanh -->
-      <form onsubmit="handleSearch(event)" class="hidden md:flex items-center flex-1 max-w-sm relative">
-        <input 
-          id="globalSearchInput"
-          type="text" 
-          placeholder="Tìm tài liệu, giáo trình..." 
-          class="w-full pl-8 pr-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-blue-500 rounded-lg focus:outline-none text-xs text-slate-800 dark:text-slate-100"
-        />
-        <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5"></i>
-      </form>
-
-      <!-- Hành động & Chế độ tối -->
-      <div class="flex items-center gap-3 flex-shrink-0">
-        <button onclick="navigate('home')" class="px-2 py-1.5 rounded text-xs font-semibold hover:text-blue-600 dark:hover:text-blue-400 transition-all">
-          Trang chủ
-        </button>
-
-        <div class="relative group">
-          <button class="px-2 py-1.5 rounded text-xs font-semibold hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1 transition-all">
-            Danh mục <i data-lucide="chevron-down" class="w-3 h-3"></i>
-          </button>
-          <div id="headerCategoryDropdown" class="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg shadow-lg py-1 hidden group-hover:block z-50">
-            <!-- Render danh mục -->
-          </div>
-        </div>
-
-        <button onclick="toggleDarkMode()" class="p-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg transition-all">
-          <i data-lucide="moon" id="themeIcon" class="w-3.5 h-3.5"></i>
-        </button>
-
-        <!-- Admin Portal Button -->
-        <div id="adminAuthButtonArea">
-          <!-- Động đăng nhập / Dashboard -->
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- TINY HERO BANNER (Cực nhỏ theo yêu cầu - Đã bỏ gợi ý Admin Demo) -->
-  <section class="bg-slate-900 text-slate-100 border-b border-slate-800 py-3 px-4 shadow-inner">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
-      
-      <!-- Trái: Tải Ultraview & Hotline -->
-      <div class="flex flex-wrap items-center gap-4 text-xs w-full md:w-auto">
-        <div class="flex items-center gap-1.5 text-blue-400 font-bold">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400 animate-pulse"></i>
-          <span>Hỗ Trợ Trực Tuyến:</span>
-        </div>
-        <a 
-          href="https://www.ultraviewer.net/vi/UltraViewer_setup_6.6_vi.exe" 
-          class="flex items-center gap-1 bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded font-bold transition-all shadow-sm"
-          target="_blank"
-        >
-          <i data-lucide="download" class="w-3 h-3"></i> Tải Ultraviewer
-        </a>
-        <a 
-          href="tel:19006134" 
-          class="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-2.5 py-1 rounded font-bold transition-all"
-        >
-          <i data-lucide="phone" class="w-3 h-3"></i> Hotline: 19006134
-        </a>
-      </div>
-
-      <!-- Phải: Đồng bộ bảo mật -->
-      <div class="hidden md:flex items-center gap-2 text-xs text-slate-400">
-        <span class="flex items-center gap-1 text-emerald-400">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-          Đường truyền bảo mật SSL
-        </span>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- MAIN DYNAMIC CONTENT (Cố định chiều cao vùng chứa tránh Layout Shift khi đổi Tab) -->
-  <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6 flex flex-col justify-start" id="mainContainer">
-    <div class="min-h-[580px] flex flex-col" id="app">
-      <!-- Nơi render các view -->
-      <div class="flex items-center justify-center py-32">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    </div>
-  </main>
-
-  <!-- FOOTER (Rút gọn tối đa - Cực kỳ tinh gọn, cố định chân trang) -->
-  <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 py-4 text-xs mt-auto">
-    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-2">
-        <i data-lucide="file-text" class="w-4 h-4 text-blue-500"></i>
-        <span class="font-bold text-white">PDF Share Portal</span>
-        <span>• © 2026 Toàn bộ tài liệu hỗ trợ tải xuống miễn phí</span>
-      </div>
-      <div class="flex flex-wrap items-center gap-4">
-        <a href="https://www.ultraviewer.net/vi/UltraViewer_setup_6.6_vi.exe" class="hover:text-white transition-all inline-flex items-center gap-1 font-medium">
-          <i data-lucide="download" class="w-3 h-3"></i> Tải Ultraviewer
-        </a>
-        <span class="text-slate-700">|</span>
-        <a href="tel:19006134" class="text-emerald-400 hover:text-emerald-300 transition-all font-bold inline-flex items-center gap-1">
-          <i data-lucide="phone" class="w-3.5 h-3.5"></i> Hotline hỗ trợ: 1900 6134
-        </a>
-        <span class="text-slate-700">|</span>
-        <span id="sessionUidText" class="font-mono text-[10px]">UID: Loading...</span>
-      </div>
-    </div>
-  </footer>
-
-  <!-- MODAL: GỬI BÁO CÁO LỖI -->
-  <div id="reportModal" class="fixed inset-0 bg-slate-950/60 hidden items-center justify-center p-4 z-50 backdrop-blur-sm">
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 w-full max-w-sm shadow-xl relative text-xs">
-      <button onclick="closeReportModal()" class="absolute top-3 right-3 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500">
-        <i data-lucide="x" class="w-4 h-4"></i>
-      </button>
-      <h3 class="text-sm font-bold mb-3 flex items-center gap-1.5 text-rose-500">
-        <i data-lucide="alert-triangle" class="w-4 h-4"></i> Báo cáo lỗi tài liệu
-      </h3>
-      <form id="reportForm" onsubmit="submitReport(event)" class="space-y-3">
-        <input type="hidden" id="reportPdfId">
-        <input type="hidden" id="reportPdfTitle">
-        <div>
-          <label class="block font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Chi tiết lỗi gặp phải</label>
-          <textarea 
-            required 
-            rows="3" 
-            id="reportReason" 
-            placeholder="Ví dụ: Lỗi tải file, tài liệu mờ, hỏng trang..." 
-            class="w-full border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:border-rose-500"
-          ></textarea>
-        </div>
-        <button type="submit" class="w-full bg-rose-600 hover:bg-rose-500 text-white py-2 rounded-lg font-bold transition-all shadow-sm">
-          Gửi báo cáo
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL: ADMIN THÊM / SỬA CHUNG (Hỗ trợ cấu hình kích thước thích ứng) -->
-  <div id="entityModal" class="fixed inset-0 bg-slate-950/60 hidden items-center justify-center p-4 z-50 backdrop-blur-sm overflow-y-auto">
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 w-full max-w-md shadow-xl relative text-xs my-8">
-      <button onclick="closeEntityModal()" class="absolute top-3 right-3 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500">
-        <i data-lucide="x" class="w-4 h-4"></i>
-      </button>
-      <h3 id="entityModalTitle" class="text-sm font-black mb-4">Sửa thông tin</h3>
-      <div id="entityModalFormContainer">
-        <!-- Điền động form -->
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================================================= -->
-  <!-- FIREBASE & CORE LOGIC SCRIPT (ES MODULES) -->
-  <!-- ========================================================================= -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { 
-      getAuth, 
-      signInWithCustomToken, 
-      signInAnonymously, 
-      onAuthStateChanged, 
-      signInWithEmailAndPassword,
-      signOut,
-      updatePassword 
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { 
-      getFirestore, 
-      collection, 
-      doc, 
-      setDoc, 
-      getDoc, 
-      addDoc, 
-      updateDoc, 
-      deleteDoc, 
-      onSnapshot, 
-      increment 
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import {
-      getStorage,
-      ref,
-      uploadBytesResumable,
-      getDownloadURL
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
-
-    // --- Cấu hình Firebase Chính thức ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyBxVjCofmTO3C6IZDynA91UUWZ6iEvj-RY",
-      authDomain: "huongdanhotro-d56de.firebaseapp.com",
-      projectId: "huongdanhotro-d56de",
-      storageBucket: "huongdanhotro-d56de.firebasestorage.app",
-      messagingSenderId: "651625894464",
-      appId: "1:651625894464:web:b63d52413b5d278f2705a5",
-      measurementId: "G-B6N72RHYC2"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'pdf-sharing-app';
-
-    // --- States toàn cục ---
-    let user = null;
-    let isAdmin = false;
-    let activeTab = 'home';
-    let searchQuery = '';
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPDF - Thư Viện Tài Liệu Số Cao Cấp</title>
     
-    let categories = [];
-    let pdfs = [];
-    let reports = [];
-    let bookmarks = JSON.parse(localStorage.getItem('pdf_bookmarks')) || [];
+    <!-- Favicon động SVG hình cuốn sách -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+    
+    <!-- Import Google Font "Plus Jakarta Sans" cho phông chữ mịn màng và hiện đại -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    // Bộ nhớ tạm thời khi xem PDF chi tiết
-    let currentPdfObj = null;
-    let currentPdfJsDoc = null;
-    let pdfViewerPage = 1;
-    let pdfViewerTotalPages = 1;
-    let pdfViewerZoom = 1.0;
-
-    // --- Khởi động Xác thực & Theo dõi State (RULE 3) ---
-    const initAuth = async () => {
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
         }
-      } catch (error) {
-        console.error("Auth initialization error:", error);
-      }
-    };
-
-    onAuthStateChanged(auth, (currentUser) => {
-      user = currentUser;
-      isAdmin = (currentUser && !currentUser.isAnonymous);
-      
-      // Hiển thị ID phiên truy cập
-      document.getElementById('sessionUidText').textContent = `UID: ${currentUser ? currentUser.uid : 'Chưa kết nối'}`;
-
-      // Khởi tạo các Listener Realtime
-      if (currentUser) {
-        setupRealtimeSubscriptions();
-      }
-    });
-
-    // --- Realtime Subscriptions (RULE 1 & 2 - Đã bỏ articles) ---
-    let unsubCategories, unsubPdfs, unsubReports;
-    const setupRealtimeSubscriptions = () => {
-      if (unsubCategories) unsubCategories();
-      if (unsubPdfs) unsubPdfs();
-      if (unsubReports) unsubReports();
-
-      const catRef = collection(db, 'artifacts', appId, 'public', 'data', 'categories');
-      const pdfsRef = collection(db, 'artifacts', appId, 'public', 'data', 'pdfs');
-      const repRef = collection(db, 'artifacts', appId, 'public', 'data', 'reports');
-
-      unsubCategories = onSnapshot(catRef, (snapshot) => {
-        categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        categories.sort((a, b) => (a.order || 0) - (b.order || 0));
-        renderDropdownCategories();
-        renderCurrentView();
-      }, (e) => console.error("Lỗi tải danh mục:", e));
-
-      unsubPdfs = onSnapshot(pdfsRef, (snapshot) => {
-        pdfs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderCurrentView();
-      }, (e) => console.error("Lỗi tải PDF:", e));
-
-      unsubReports = onSnapshot(repRef, (snapshot) => {
-        reports = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderCurrentView();
-      }, (e) => console.error("Lỗi tải báo cáo:", e));
-    };
-
-    // --- NAVIGATION CONTROLLER ---
-    window.navigate = (tab, targetId = null) => {
-      activeTab = tab;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-
-      if (tab === 'pdf-detail' && targetId) {
-        currentPdfObj = pdfs.find(p => p.id === targetId);
-        if (currentPdfObj) {
-          // Tăng lượt xem (Realtime)
-          incrementViews(targetId);
-          pdfViewerPage = 1;
-          pdfViewerZoom = 1.0;
+    </script>
+    
+    <!-- Lucide Icons CDN (Thư viện icon hiện đại) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- PDF.js CDN (Trình dịch mã PDF trực tiếp) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
-      } else if (tab === 'category' && targetId) {
-        window.selectedCategoryObj = categories.find(c => c.id === targetId);
-      }
 
-      renderCurrentView();
-    };
+        /* Tinh chỉnh cuộn mượt và hiển thị thanh cuộn chống chói */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 99px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
 
-    const incrementViews = async (pdfId) => {
-      try {
-        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'pdfs', pdfId);
-        await updateDoc(docRef, { views: increment(1) });
-      } catch (e) {
-        console.error("Lỗi tăng lượt xem:", e);
-      }
-    };
+        /* Thanh cuộn tối chuyên biệt cho Trình đọc PDF bên trong Modal */
+        #pdf-scroll-container::-webkit-scrollbar-track,
+        #reader-sidebar-pages::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        #pdf-scroll-container::-webkit-scrollbar-thumb,
+        #reader-sidebar-pages::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 99px;
+        }
+        #pdf-scroll-container::-webkit-scrollbar-thumb:hover,
+        #reader-sidebar-pages::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
 
-    // --- RENDER DROPDOWN DANH MỤC TRÊN HEADER ---
-    const renderDropdownCategories = () => {
-      const dropdown = document.getElementById('headerCategoryDropdown');
-      if (!dropdown) return;
-      if (categories.length === 0) {
-        dropdown.innerHTML = `<p class="text-[11px] text-center text-slate-400 py-2">Không có danh mục</p>`;
-        return;
-      }
-      dropdown.innerHTML = categories.map(cat => `
-        <button 
-          onclick="navigate('category', '${cat.id}')" 
-          class="w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs flex items-center gap-2 text-slate-700 dark:text-slate-300"
-        >
-          <span class="w-2 h-2 rounded-full" style="background-color: ${cat.color || '#3B82F6'}"></span>
-          <span class="truncate">${cat.name}</span>
-        </button>
-      `).join('');
-    };
+        /* Hiệu ứng bóng đổ vật lý dạng giấy thật cho trang PDF */
+        .pdf-page-shadow {
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col text-slate-700 antialiased bg-slate-50/70">
 
-    // --- RENDER CURRENT VIEW ---
-    const renderCurrentView = () => {
-      const appEl = document.getElementById('app');
-      renderAdminButton();
+    <!-- HỘP CHỨA TOAST NOTIFICATION Ở GÓC DƯỚI BÊN PHẢI -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 max-w-sm w-full pointer-events-none"></div>
 
-      switch(activeTab) {
-        case 'home':
-          appEl.innerHTML = renderHome();
-          break;
-        case 'category':
-          appEl.innerHTML = renderCategory();
-          break;
-        case 'pdf-detail':
-          appEl.innerHTML = renderPdfDetail();
-          initPdfRenderer();
-          break;
-        case 'search':
-          appEl.innerHTML = renderSearch();
-          break;
-        case 'admin-login':
-          appEl.innerHTML = renderAdminLogin();
-          break;
-        case 'admin-dashboard':
-          if (!isAdmin) {
-            navigate('admin-login');
-          } else {
-            appEl.innerHTML = renderAdminDashboard();
-          }
-          break;
-      }
-      lucide.createIcons();
-    };
-
-    // --- RENDER VIEW CHỦ (HOME - Loại bỏ mới cập nhật & đọc nhiều nhất) ---
-    const renderHome = () => {
-      const featured = pdfs.filter(p => p.featured && p.status === 'public');
-
-      return `
-        <div class="space-y-8 flex-grow">
-          <!-- Quick Stats Panel -->
-          <div class="grid grid-cols-3 gap-4 bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <div class="text-center p-2 border-r border-slate-100 dark:border-slate-800">
-              <span class="text-xl font-extrabold text-blue-600 dark:text-blue-400">${pdfs.length}</span>
-              <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Tài liệu</p>
-            </div>
-            <div class="text-center p-2 border-r border-slate-100 dark:border-slate-800">
-              <span class="text-xl font-extrabold text-indigo-600 dark:text-indigo-400">${categories.length}</span>
-              <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Danh mục</p>
-            </div>
-            <div class="text-center p-2">
-              <span class="text-xl font-extrabold text-emerald-600 dark:text-emerald-400">${pdfs.reduce((acc,p) => acc + (p.views || 0), 0)}</span>
-              <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Lượt xem</p>
-            </div>
-          </div>
-
-          <!-- Danh mục nổi bật -->
-          <div>
-            <h2 class="text-sm font-black mb-4 flex items-center gap-1.5"><i data-lucide="folder" class="w-4 h-4 text-blue-600"></i> Danh Mục Tài Liệu</h2>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              ${categories.map(cat => `
-                <div onclick="navigate('category', '${cat.id}')" class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5">
-                  <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-white mb-2" style="background-color: ${cat.color || '#3B82F6'}">
-                    ${cat.name.charAt(0)}
-                  </div>
-                  <h4 class="font-bold text-slate-900 dark:text-white truncate">${cat.name}</h4>
-                  <p class="text-[11px] text-slate-400 mt-0.5">${pdfs.filter(p => p.categoryId === cat.id && p.status === 'public').length} tài liệu</p>
+    <!-- THANH DIỀU HƯỚNG CHÍNH (HEADER - MÀU SẮC ĐẬM CHỐNG CHÓI, GLASSMORPHISM CAO CẤP) -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <!-- Logo: Bấm vào để reload/reset lại trang -->
+                <div class="flex items-center gap-3 cursor-pointer group" onclick="reloadPageState()" title="Tải lại trang chủ">
+                    <div class="bg-gradient-to-tr from-brand-500 to-indigo-600 text-white p-2.5 rounded-2xl shadow-lg shadow-brand-500/20 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                        <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                    </div>
+                    <span class="text-lg font-extrabold tracking-tight text-white">Smart<span class="text-brand-400">PDF</span></span>
                 </div>
-              `).join('')}
-            </div>
-          </div>
 
-          <!-- Tài liệu ghim tiêu biểu -->
-          <div>
-            <h2 class="text-sm font-black mb-4 flex items-center gap-1.5 text-amber-500"><i data-lucide="sparkles" class="w-4 h-4"></i> Tài Liệu Tiêu Biểu</h2>
-            ${featured.length === 0 ? `
-              <div class="text-center py-10 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
-                <p class="text-slate-400 text-xs">Hiện tại chưa có tài liệu tiêu biểu nào được ghim.</p>
-              </div>
-            ` : `
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                ${featured.map(pdf => {
-                  const cat = categories.find(c => c.id === pdf.categoryId);
-                  return `
-                    <div onclick="navigate('pdf-detail', '${pdf.id}')" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 flex gap-3 cursor-pointer hover:shadow transition-all">
-                      <img src="${pdf.thumbnail}" class="w-16 h-24 object-cover rounded-lg bg-slate-100 flex-shrink-0" />
-                      <div class="flex flex-col justify-between flex-grow min-w-0">
-                        <div>
-                          ${cat ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded" style="background-color: ${cat.color}15; color: ${cat.color}">${cat.name}</span>` : ''}
-                          <h3 class="font-bold text-xs text-slate-900 dark:text-white mt-1 line-clamp-2">${pdf.title}</h3>
-                          <p class="text-[10px] text-slate-400 line-clamp-1 mt-0.5">${pdf.description || ''}</p>
+                <!-- Ô tìm kiếm thông tin -->
+                <div class="hidden md:flex flex-1 max-w-md mx-8">
+                    <div class="relative w-full">
+                        <input type="text" id="search-input" oninput="handleSearch()" placeholder="Tìm kiếm tài liệu, giáo trình, chuyên đề học tập..." class="w-full bg-slate-800/60 text-slate-100 placeholder-slate-400 pl-11 pr-4 py-2.5 rounded-xl text-sm border border-slate-700/60 focus:bg-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all duration-300">
+                        <div class="absolute left-3.5 top-3 text-slate-400">
+                            <i data-lucide="search" class="w-4 h-4"></i>
                         </div>
-                        <div class="flex items-center justify-between text-[10px] text-slate-400 mt-1">
-                          <span class="flex items-center gap-1"><i data-lucide="eye" class="w-3.5 h-3.5"></i> ${pdf.views || 0}</span>
-                          ${pdf.allowDownload ? `<span class="text-emerald-500 font-bold text-[9px]">Có thể tải</span>` : ''}
+                    </div>
+                </div>
+
+                <!-- Các nút tác vụ hệ thống -->
+                <div class="flex items-center gap-3">
+                    <button id="btn-admin-panel" onclick="navigateTo('admin')" class="hidden bg-brand-500/10 hover:bg-brand-500/20 text-brand-300 font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all duration-300 flex items-center gap-2 border border-brand-500/20">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 text-brand-450"></i>
+                        <span>Quản trị viên</span>
+                    </button>
+                    <button id="btn-auth" onclick="toggleAuthModal(true)" class="bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all duration-300 flex items-center gap-2 shadow-lg shadow-brand-500/20">
+                        <i id="auth-icon" data-lucide="log-in" class="w-4 h-4"></i>
+                        <span id="auth-text">Đăng nhập Admin</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- TRANG CHỦ & PHÂN LOẠI (USER DASHBOARD) -->
+    <main id="view-home" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Sidebar Danh Mục bên trái - GIỚI HẠN CHIỀU CAO VỪA KHÍT MÀN HÌNH -->
+            <div class="lg:col-span-1 flex flex-col gap-4">
+                <div class="bg-white rounded-2xl border border-slate-200/60 p-5 shadow-sm sticky top-20 max-h-[calc(100vh-140px)] flex flex-col">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2.5 flex-shrink-0">
+                        <i data-lucide="folder-tree" class="w-4 h-4 text-brand-500"></i>
+                        <span>Danh mục tài liệu</span>
+                    </h3>
+                    <div id="category-sidebar-list" class="flex flex-col gap-2 overflow-y-auto pr-1 flex-1">
+                        <!-- Danh mục tự động tải vào đây -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Khung Chứa Thẻ PDF & Phân trang cố định -->
+            <div class="lg:col-span-3 flex flex-col gap-6">
+                <!-- Bộ lọc kết quả tìm kiếm & Sắp xếp -->
+                <div class="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm">
+                    <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Đang xem:</span>
+                        <span id="current-filter-badge" class="bg-brand-50 text-brand-700 text-xs font-extrabold px-3.5 py-1.5 rounded-xl border border-brand-100">Tất cả</span>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto shrink-0 justify-end">
+                        <!-- Cụm Sắp xếp -->
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <span class="text-xs text-slate-400 font-bold shrink-0">Sắp xếp:</span>
+                            <select id="sort-select" onchange="handleSortChange()" class="text-xs bg-slate-50 border border-slate-250/70 px-3.5 py-2 rounded-xl focus:bg-white focus:border-brand-500 focus:outline-none transition-all w-full sm:w-44 font-semibold text-slate-600">
+                                <option value="newest">Mới xuất bản</option>
+                                <option value="oldest">Cũ nhất</option>
+                                <option value="views-desc">Lượt xem nhiều nhất</option>
+                                <option value="views-asc">Lượt xem ít nhất</option>
+                                <option value="title-asc">Tiêu đề (A-Z)</option>
+                                <option value="title-desc">Tiêu đề (Z-A)</option>
+                            </select>
                         </div>
-                      </div>
+                        <div class="text-xs text-slate-400 font-bold shrink-0 bg-slate-50 border border-slate-200/50 px-3.5 py-2 rounded-xl" id="articles-count">Tìm thấy 0 tài liệu</div>
                     </div>
-                  `;
-                }).join('')}
-              </div>
-            `}
-          </div>
+                </div>
+
+                <!-- Khung chính bảo vệ vị trí phân trang không dịch chuyển -->
+                <div class="flex flex-col justify-between min-h-[750px] bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm">
+                    <!-- Danh sách tài liệu dạng lưới -->
+                    <div id="articles-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-max">
+                        <!-- Các thẻ tài liệu (6 bài/trang) -->
+                    </div>
+
+                    <!-- Trạng thái trống (Empty State) -->
+                    <div id="empty-state" class="hidden py-24 flex-col items-center justify-center text-center">
+                        <div class="bg-slate-50 text-slate-400 p-4 rounded-full mb-4">
+                            <i data-lucide="folder-open" class="w-12 h-12 text-slate-350"></i>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-800">Không tìm thấy tài liệu phù hợp</h3>
+                        <p class="text-slate-500 text-xs mt-1">Thay đổi từ khóa tìm kiếm hoặc chọn danh mục khác.</p>
+                    </div>
+
+                    <!-- Khu vực điều khiển chuyển trang (Cố định ở đáy) -->
+                    <div id="pagination-wrapper" class="mt-8 border-t border-slate-100 pt-6 flex justify-center items-center gap-2">
+                        <!-- Các nút phân trang -->
+                    </div>
+                </div>
+            </div>
         </div>
-      `;
-    };
+    </main>
 
-    // --- RENDER DANH MỤC (CategoryView) ---
-    const renderCategory = () => {
-      const category = window.selectedCategoryObj;
-      if (!category) return `<p class="text-center text-slate-400 py-10">Danh mục không tồn tại</p>`;
-      const catPdfs = pdfs.filter(p => p.categoryId === category.id && p.status === 'public');
-
-      return `
-        <div>
-          <div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800 pb-4 mb-6">
-            <button onclick="navigate('home')" class="p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 rounded-lg">
-              <i data-lucide="arrow-left" class="w-4 h-4"></i>
-            </button>
-            <div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full" style="background-color: ${category.color}"></span> Danh mục tài liệu
-              </span>
-              <h1 class="text-lg font-black text-slate-900 dark:text-white">${category.name}</h1>
-            </div>
-          </div>
-
-          ${catPdfs.length === 0 ? `
-            <div class="text-center py-16 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-              <i data-lucide="file-text" class="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-2"></i>
-              <h4 class="font-bold">Danh mục trống</h4>
-              <p class="text-xs text-slate-400 mt-1">Quản trị viên đang cập nhật tài liệu cho chuyên mục này.</p>
-            </div>
-          ` : `
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              ${catPdfs.map(pdf => `
-                <div onclick="navigate('pdf-detail', '${pdf.id}')" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 cursor-pointer hover:shadow transition-all flex flex-col justify-between h-full">
-                  <div>
-                    <img src="${pdf.thumbnail}" class="w-full h-32 object-cover rounded-lg bg-slate-100 mb-2" />
-                    <h4 class="font-bold text-xs text-slate-900 dark:text-white line-clamp-2">${pdf.title}</h4>
-                  </div>
-                  <div class="flex items-center justify-between text-[10px] text-slate-400 mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/60">
-                    <span class="flex items-center gap-0.5"><i data-lucide="eye" class="w-3 h-3"></i> ${pdf.views || 0}</span>
-                    ${pdf.allowDownload ? `<span class="text-emerald-500 font-bold">FREE</span>` : ''}
-                  </div>
+    <!-- TRANG QUẢN TRỊ ADMIN (ADMIN VIEW) -->
+    <main id="view-admin" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
+        <!-- Header Quản Trị thu gọn tối đa -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200/60 pb-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-brand-600 to-indigo-650 text-white p-2.5 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <i data-lucide="sliders" class="w-4.5 h-4.5"></i>
                 </div>
-              `).join('')}
-            </div>
-          `}
-        </div>
-      `;
-    };
-
-    // --- RENDER CHI TIẾT PDF & VIEWER ---
-    const renderPdfDetail = () => {
-      const pdf = currentPdfObj;
-      if (!pdf) return `<p class="text-center text-slate-400 py-10">Tài liệu không tìm thấy</p>`;
-      const cat = categories.find(c => c.id === pdf.categoryId);
-
-      return `
-        <div class="flex flex-col lg:flex-row gap-6">
-          <!-- Sidebar: Information -->
-          <div class="w-full lg:w-1/3 flex-shrink-0 space-y-4">
-            <button onclick="navigate('home')" class="text-xs font-bold text-slate-400 hover:text-slate-800 dark:hover:text-white flex items-center gap-1 mb-2">
-              <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Quay về danh sách
-            </button>
-
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm space-y-4">
-              <img src="${pdf.thumbnail}" class="w-full h-48 object-cover rounded-lg bg-slate-100 shadow-sm" />
-              <div>
-                ${cat ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded" style="background-color: ${cat.color}15; color: ${cat.color}">${cat.name}</span>` : ''}
-                <h1 class="text-sm font-bold text-slate-900 dark:text-white mt-2 leading-snug">${pdf.title}</h1>
-                <p class="text-xs text-slate-400 mt-2 leading-relaxed">${pdf.description || 'Không có mô tả chi tiết.'}</p>
-              </div>
-
-              <!-- Tiện ích -->
-              <div class="grid grid-cols-2 gap-2 pt-2">
-                <button onclick="toggleLocalBookmark('${pdf.id}')" id="bookmarkBtn" class="flex items-center justify-center gap-1 py-1.5 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
-                  <i data-lucide="bookmark" class="w-3.5 h-3.5 ${bookmarks.includes(pdf.id) ? 'text-amber-500 fill-amber-500' : ''}"></i> <span>Yêu thích</span>
-                </button>
-                <button onclick="copyPdfShareLink()" class="flex items-center justify-center gap-1 py-1.5 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
-                  <i data-lucide="share-2" class="w-3.5 h-3.5"></i> Chia sẻ link
-                </button>
-              </div>
-
-              ${pdf.allowDownload ? `
-                <a href="${pdf.pdfUrl}" target="_blank" class="flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg text-xs font-bold transition-all shadow-sm">
-                  <i data-lucide="download" class="w-3.5 h-3.5"></i> Tải PDF Xuống
-                </a>
-              ` : `
-                <div class="bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 rounded-lg p-2.5 text-[11px] font-medium leading-relaxed">
-                  Quản trị viên đã khóa chức năng tải xuống trực tiếp đối với giáo trình này. Chỉ hỗ trợ đọc trực tiếp.
+                <div>
+                    <h2 class="text-base font-extrabold text-slate-900 tracking-tight">Hộp Quản Trị Hệ Thống</h2>
+                    <p class="text-[11px] text-slate-500">Cấu hình nhanh danh mục và tài liệu.</p>
                 </div>
-              `}
-
-              <button onclick="openReportModal('${pdf.id}', '${pdf.title.replace(/'/g, "\\'")}')" class="w-full text-center text-slate-400 hover:text-rose-500 text-[10px] pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-center gap-1">
-                <i data-lucide="alert-triangle" class="w-3 h-3"></i> Báo cáo lỗi tài liệu này
-              </button>
-            </div>
-          </div>
-
-          <!-- Reader PDF.js Area -->
-          <div class="w-full lg:w-2/3 flex flex-col space-y-3">
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-sm flex flex-col justify-between">
-              
-              <!-- Toolbar -->
-              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3 mb-3">
-                <div class="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
-                  <i data-lucide="file-text" class="w-4 h-4 text-blue-600"></i> Trình đọc PDF.js
-                </div>
-                <div class="flex items-center gap-1">
-                  <!-- Thu phóng -->
-                  <button onclick="changePdfZoom(-0.1)" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"><i data-lucide="zoom-out" class="w-3.5 h-3.5"></i></button>
-                  <span class="text-xs font-bold font-mono px-1.5" id="zoomPercentage">100%</span>
-                  <button onclick="changePdfZoom(0.1)" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"><i data-lucide="zoom-in" class="w-3.5 h-3.5"></i></button>
-                  
-                  <div class="w-px h-3 bg-slate-200 dark:bg-slate-800 mx-1"></div>
-
-                  <!-- Phân trang -->
-                  <button onclick="changePdfPage(-1)" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i></button>
-                  <span class="text-xs font-bold font-mono" id="pageNumberDisplay">Trang 1 / 1</span>
-                  <button onclick="changePdfPage(1)" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>
-                </div>
-              </div>
-
-              <!-- Canvas Container -->
-              <div class="bg-slate-100 dark:bg-slate-950 rounded-lg p-3 overflow-auto flex items-center justify-center border border-slate-200 dark:border-slate-800 relative min-h-[500px]" id="pdfCanvasWrapper">
-                <canvas id="pdfReaderCanvas" class="shadow-lg bg-white max-w-full"></canvas>
-                <div id="pdfLoadingIndicator" class="absolute inset-0 bg-slate-900/5 backdrop-blur-[1px] hidden items-center justify-center">
-                  <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                </div>
-              </div>
-
-              <div class="text-[10px] text-slate-400 mt-2 flex justify-between items-center">
-                <span>Mẹo: Tự động tải chế độ trực tuyến dự phòng nếu file hiển thị lỗi.</span>
-                <a href="https://docs.google.com/viewer?url=${encodeURIComponent(pdf.pdfUrl)}&embedded=true" target="_blank" class="text-blue-500 hover:underline inline-flex items-center gap-0.5">
-                  Mở Google Viewer <i data-lucide="external-link" class="w-2.5 h-2.5"></i>
-                </a>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      `;
-    };
-
-    // --- KHỞI CHẠY BỘ ĐỌC PDF.JS ---
-    const initPdfRenderer = () => {
-      const pdf = currentPdfObj;
-      if (!pdf) return;
-
-      const loadingIndicator = document.getElementById('pdfLoadingIndicator');
-      if (loadingIndicator) loadingIndicator.style.display = 'flex';
-
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
-      
-      const loadingTask = window.pdfjsLib.getDocument(pdf.pdfUrl);
-      loadingTask.promise.then((pdfDoc) => {
-        currentPdfJsDoc = pdfDoc;
-        pdfViewerTotalPages = pdfDoc.numPages;
-        renderPdfPage();
-      }).catch(err => {
-        console.error("Không tải được PDF:", err);
-        // Fallback: vẽ bảng báo lỗi vào canvas hoặc gợi ý mở link trực tiếp
-        const canvas = document.getElementById('pdfReaderCanvas');
-        if (canvas) {
-          const ctx = canvas.getContext('2d');
-          canvas.width = 400;
-          canvas.height = 150;
-          ctx.fillStyle = "#ef4444";
-          ctx.font = "bold 13px Inter";
-          ctx.fillText("Không thể kết xuất PDF trực tiếp qua CORS.", 20, 50);
-          ctx.fillStyle = "#475569";
-          ctx.font = "11px Inter";
-          ctx.fillText("Vui lòng tải xuống hoặc sử dụng liên kết Google Viewer dự phòng.", 20, 80);
-        }
-        if (loadingIndicator) loadingIndicator.style.display = 'none';
-      });
-    };
-
-    const renderPdfPage = () => {
-      if (!currentPdfJsDoc) return;
-      const canvas = document.getElementById('pdfReaderCanvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-
-      const loadingIndicator = document.getElementById('pdfLoadingIndicator');
-      if (loadingIndicator) loadingIndicator.style.display = 'flex';
-
-      currentPdfJsDoc.getPage(pdfViewerPage).then(page => {
-        const viewport = page.getViewport({ scale: pdfViewerZoom });
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-
-        const renderContext = {
-          canvasContext: ctx,
-          viewport: viewport
-        };
-        page.render(renderContext).promise.then(() => {
-          if (loadingIndicator) loadingIndicator.style.display = 'none';
-          document.getElementById('zoomPercentage').textContent = `${Math.round(pdfViewerZoom * 100)}%`;
-          document.getElementById('pageNumberDisplay').textContent = `Trang ${pdfViewerPage} / ${pdfViewerTotalPages}`;
-        });
-      });
-    };
-
-    window.changePdfPage = (dir) => {
-      const next = pdfViewerPage + dir;
-      if (next >= 1 && next <= pdfViewerTotalPages) {
-        pdfViewerPage = next;
-        renderPdfPage();
-      }
-    };
-
-    window.changePdfZoom = (val) => {
-      const next = pdfViewerZoom + val;
-      if (next >= 0.5 && next <= 2.0) {
-        pdfViewerZoom = next;
-        renderPdfPage();
-      }
-    };
-
-    // --- BOOKMARK CONTROLLER ---
-    window.toggleLocalBookmark = (pdfId) => {
-      if (bookmarks.includes(pdfId)) {
-        bookmarks = bookmarks.filter(id => id !== pdfId);
-      } else {
-        bookmarks.push(pdfId);
-      }
-      localStorage.setItem('pdf_bookmarks', JSON.stringify(bookmarks));
-      renderCurrentView();
-    };
-
-    window.copyPdfShareLink = () => {
-      const shareUrl = window.location.href;
-      const el = document.createElement('textarea');
-      el.value = shareUrl;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand('copy');
-      document.body.removeChild(el);
-      alert("Đã sao chép đường dẫn tài liệu vào bộ nhớ tạm!");
-    };
-
-    // --- SEARCH CONTROLLER ---
-    window.handleSearch = (e) => {
-      e.preventDefault();
-      searchQuery = document.getElementById('globalSearchInput').value;
-      navigate('search');
-    };
-
-    const renderSearch = () => {
-      const results = pdfs.filter(pdf => {
-        if (pdf.status !== 'public') return false;
-        return pdf.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-               pdf.description.toLowerCase().includes(searchQuery.toLowerCase());
-      });
-
-      return `
-        <div>
-          <div class="mb-6">
-            <h1 class="text-sm font-black flex items-center gap-1.5"><i data-lucide="search" class="w-4 h-4"></i> Kết quả tìm kiếm cho: "${searchQuery}"</h1>
-            <p class="text-[11px] text-slate-400 mt-1">Tìm thấy ${results.length} tài liệu tương thích</p>
-          </div>
-
-          ${results.length === 0 ? `
-            <div class="text-center py-16 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-              <p class="text-slate-400">Không tìm thấy tài liệu phù hợp.</p>
-            </div>
-          ` : `
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              ${results.map(pdf => `
-                <div onclick="navigate('pdf-detail', '${pdf.id}')" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 cursor-pointer hover:shadow transition-all flex flex-col justify-between h-full">
-                  <div>
-                    <img src="${pdf.thumbnail}" class="w-full h-32 object-cover rounded-lg bg-slate-100 mb-2" />
-                    <h4 class="font-bold text-xs text-slate-900 dark:text-white line-clamp-2">${pdf.title}</h4>
-                  </div>
-                  <div class="flex items-center justify-between text-[10px] text-slate-400 mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/60">
-                    <span class="flex items-center gap-0.5"><i data-lucide="eye" class="w-3 h-3"></i> ${pdf.views || 0}</span>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-          `}
-        </div>
-      `;
-    };
-
-    // --- ADMIN AUTH BUTTON CONTROLLER ---
-    const renderAdminButton = () => {
-      const container = document.getElementById('adminAuthButtonArea');
-      if (!container) return;
-
-      if (isAdmin) {
-        container.innerHTML = `
-          <button onclick="navigate('admin-dashboard')" class="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm shadow-emerald-500/10 transition-all">
-            <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
-            <span>Bảng Quản trị</span>
-          </button>
-        `;
-      } else {
-        container.innerHTML = `
-          <button onclick="navigate('admin-login')" class="flex items-center gap-1 bg-slate-800 hover:bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm">
-            <i data-lucide="lock" class="w-3.5 h-3.5"></i>
-            <span>Đăng nhập Admin</span>
-          </button>
-        `;
-      }
-    };
-
-    // --- TRANG ĐĂNG NHẬP ADMIN ---
-    const renderAdminLogin = () => {
-      return `
-        <div class="max-w-sm mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-md space-y-4 text-xs">
-          <div class="text-center">
-            <div class="bg-blue-600 text-white p-2.5 rounded-xl inline-flex mb-2">
-              <i data-lucide="lock" class="w-5 h-5"></i>
-            </div>
-            <h2 class="text-sm font-black">Xác thực Quản trị viên</h2>
-            <p class="text-[10px] text-slate-400 mt-0.5">Nhập tài khoản Firebase của bạn để quản lý</p>
-          </div>
-
-          <form id="adminLoginForm" onsubmit="window.handleAdminLogin(event)" class="space-y-3">
-            <div>
-              <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">Email quản trị</label>
-              <input type="email" id="loginEmail" required class="w-full border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-800 focus:outline-none" placeholder="admin@example.com" />
             </div>
             <div>
-              <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">Mật khẩu</label>
-              <input type="password" id="loginPassword" required class="w-full border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-800 focus:outline-none" placeholder="••••••••" />
+                <button onclick="navigateTo('home')" class="bg-white hover:bg-slate-900 text-slate-700 hover:text-white border border-slate-250/80 hover:border-slate-900 font-bold px-4 py-2.5 rounded-xl text-xs tracking-wider uppercase transition-all duration-300 flex items-center gap-2 shadow-sm">
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                    <span>Trở Về Trang Chủ</span>
+                </button>
             </div>
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg font-bold">Đăng nhập</button>
-          </form>
         </div>
-      `;
-    };
 
-    window.handleAdminLogin = async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value;
-      const pass = document.getElementById('loginPassword').value;
-      try {
-        await signInWithEmailAndPassword(auth, email, pass);
-        navigate('admin-dashboard');
-      } catch (err) {
-        alert("Thông tin tài khoản không hợp lệ. Vui lòng kiểm tra lại Email hoặc Mật khẩu hệ thống.");
-      }
-    };
-
-    // --- BẢNG ĐIỀU KHIỂN DASHBOARD ADMIN ---
-    window.adminActiveSubTab = 'statistics';
-
-    const renderAdminDashboard = () => {
-      return `
-        <div class="flex flex-col md:flex-row gap-6 min-h-[500px]">
-          <!-- Sidebar Dashboard (Cố định chiều rộng không xê dịch) -->
-          <aside class="w-full md:w-56 flex-shrink-0">
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-xl space-y-3 shadow-sm sticky top-20">
-              <div class="text-center pb-3 border-b border-slate-100 dark:border-slate-800">
-                <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto text-sm font-bold border border-emerald-500/10">
-                  AD
-                </div>
-                <h4 class="font-bold text-xs text-slate-800 dark:text-white mt-2 truncate">${auth.currentUser ? auth.currentUser.email : 'Admin'}</h4>
-              </div>
-
-              <div class="space-y-1">
-                <button onclick="setAdminSubTab('statistics')" class="w-full flex items-center justify-between p-2 rounded-lg font-semibold transition-all ${window.adminActiveSubTab === 'statistics' ? 'bg-blue-600 text-white shadow-sm' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}">
-                  <span class="flex items-center gap-1.5"><i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i> Thống kê</span>
-                </button>
-                <button onclick="setAdminSubTab('pdfs')" class="w-full flex items-center justify-between p-2 rounded-lg font-semibold transition-all ${window.adminActiveSubTab === 'pdfs' ? 'bg-blue-600 text-white shadow-sm' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}">
-                  <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="w-3.5 h-3.5"></i> Quản lý PDF</span>
-                </button>
-                <button onclick="setAdminSubTab('categories')" class="w-full flex items-center justify-between p-2 rounded-lg font-semibold transition-all ${window.adminActiveSubTab === 'categories' ? 'bg-blue-600 text-white shadow-sm' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}">
-                  <span class="flex items-center gap-1.5"><i data-lucide="folder" class="w-3.5 h-3.5"></i> Danh mục</span>
-                </button>
-                <button onclick="setAdminSubTab('reports')" class="w-full flex items-center justify-between p-2 rounded-lg font-semibold transition-all ${window.adminActiveSubTab === 'reports' ? 'bg-blue-600 text-white shadow-sm' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}">
-                  <span class="flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Báo lỗi (${reports.length})</span>
-                </button>
-              </div>
-
-              <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1">
-                <button onclick="openChangePasswordModal()" class="w-full text-left flex items-center gap-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-white p-1.5 rounded text-[11px] font-bold">
-                  <i data-lucide="settings" class="w-3.5 h-3.5"></i> Đổi mật khẩu
-                </button>
-                <button onclick="window.handleAdminLogout()" class="w-full text-left flex items-center gap-1.5 text-rose-500 hover:bg-rose-500/10 p-1.5 rounded text-[11px] font-bold">
-                  <i data-lucide="log-in" class="w-3.5 h-3.5 rotate-180"></i> Đăng xuất
-                </button>
-              </div>
+        <!-- Các thông số thống kê CHO NHỎ LẠI ĐỂ TIẾT KIỆM DIỆN TÍCH -->
+        <div class="flex flex-wrap gap-3 py-1 text-slate-650 text-xs font-bold">
+            <div class="bg-white border border-slate-200/60 px-4 py-2 rounded-xl flex items-center gap-2.5 shadow-sm">
+                <i data-lucide="file-text" class="w-4 h-4 text-brand-500"></i>
+                <span>Tài liệu: <strong id="stat-total-articles" class="text-slate-900 font-extrabold">0</strong></span>
             </div>
-          </aside>
-
-          <!-- Main Panel Content (Cố định min-height để không gây nhảy trang) -->
-          <section class="flex-grow bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm min-h-[480px]">
-            ${renderAdminSubTabContent()}
-          </section>
+            <div class="bg-white border border-slate-200/60 px-4 py-2 rounded-xl flex items-center gap-2.5 shadow-sm">
+                <i data-lucide="folder" class="w-4 h-4 text-indigo-500"></i>
+                <span>Danh mục: <strong id="stat-total-categories" class="text-slate-900 font-extrabold">0</strong></span>
+            </div>
+            <div class="bg-white border border-slate-200/60 px-4 py-2 rounded-xl flex items-center gap-2.5 shadow-sm">
+                <i data-lucide="eye" class="w-4 h-4 text-emerald-500"></i>
+                <span>Lượt xem: <strong id="stat-total-views" class="text-slate-900 font-extrabold">0</strong></span>
+            </div>
         </div>
-      `;
-    };
 
-    window.setAdminSubTab = (subTab) => {
-      window.adminActiveSubTab = subTab;
-      renderCurrentView();
-    };
-
-    window.handleAdminLogout = async () => {
-      try {
-        await signOut(auth);
-        navigate('home');
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    // --- NỘI DUNG CHI TIẾT TỪNG TAB TRONG DASHBOARD (Thiết kế lại hoàn toàn trang chủ Quản trị) ---
-    const renderAdminSubTabContent = () => {
-      switch(window.adminActiveSubTab) {
-        case 'statistics':
-          return `
-            <div class="space-y-6">
-              <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+        <!-- Khung tác nghiệp biên soạn -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <!-- Quản lý Danh mục (1/3) -->
+            <div class="xl:col-span-1 bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm flex flex-col gap-4">
                 <div>
-                  <h2 class="text-sm font-black">Bảng Quản Trị Hệ Thống</h2>
-                  <p class="text-[10px] text-slate-400 mt-0.5">Tổng quan số liệu và thao tác vận hành thời gian thực</p>
-                </div>
-                <div class="text-[10px] bg-emerald-500/10 text-emerald-500 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Live
-                </div>
-              </div>
-
-              <!-- Thẻ Thống kê Gradient cao cấp -->
-              <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-gradient-to-br from-blue-500/5 to-indigo-500/5 border border-blue-500/10 dark:border-blue-500/20 p-4 rounded-xl relative overflow-hidden group">
-                  <div class="absolute -right-3 -top-3 text-blue-500/10 group-hover:scale-110 transition-all duration-300">
-                    <i data-lucide="file-text" class="w-16 h-16"></i>
-                  </div>
-                  <span class="text-[10px] uppercase font-bold text-blue-600 dark:text-blue-400 tracking-wider">Tổng PDF</span>
-                  <span class="text-2xl font-black block text-slate-900 dark:text-white mt-1">${pdfs.length}</span>
-                  <p class="text-[9px] text-slate-400 mt-2">Đã lưu trong CSDL</p>
+                    <h3 class="text-xs font-bold text-slate-900 mb-0.5 uppercase tracking-wider text-slate-400">Biên tập danh mục</h3>
+                    <p class="text-[11px] text-slate-500">Thêm hoặc loại bỏ nhóm phân loại.</p>
                 </div>
 
-                <div class="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/10 dark:border-emerald-500/20 p-4 rounded-xl relative overflow-hidden group">
-                  <div class="absolute -right-3 -top-3 text-emerald-500/10 group-hover:scale-110 transition-all duration-300">
-                    <i data-lucide="folder" class="w-16 h-16"></i>
-                  </div>
-                  <span class="text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400 tracking-wider">Danh mục</span>
-                  <span class="text-2xl font-black block text-slate-900 dark:text-white mt-1">${categories.length}</span>
-                  <p class="text-[9px] text-slate-400 mt-2">Chuyên mục phân loại</p>
-                </div>
-
-                <div class="bg-gradient-to-br from-indigo-500/5 to-purple-500/5 border border-indigo-500/10 dark:border-indigo-500/20 p-4 rounded-xl relative overflow-hidden group">
-                  <div class="absolute -right-3 -top-3 text-indigo-500/10 group-hover:scale-110 transition-all duration-300">
-                    <i data-lucide="eye" class="w-16 h-16"></i>
-                  </div>
-                  <span class="text-[10px] uppercase font-bold text-indigo-600 dark:text-indigo-400 tracking-wider">Lượt xem</span>
-                  <span class="text-2xl font-black block text-slate-900 dark:text-white mt-1">${pdfs.reduce((acc,p) => acc + (p.views || 0), 0)}</span>
-                  <p class="text-[9px] text-slate-400 mt-2">Tổng độc giả trực tuyến</p>
-                </div>
-
-                <div class="bg-gradient-to-br from-rose-500/5 to-orange-500/5 border border-rose-500/10 dark:border-rose-500/20 p-4 rounded-xl relative overflow-hidden group">
-                  <div class="absolute -right-3 -top-3 text-rose-500/10 group-hover:scale-110 transition-all duration-300">
-                    <i data-lucide="alert-triangle" class="w-16 h-16"></i>
-                  </div>
-                  <span class="text-[10px] uppercase font-bold text-rose-600 dark:text-rose-400 tracking-wider">Báo cáo lỗi</span>
-                  <span class="text-2xl font-black block text-slate-900 dark:text-white mt-1">${reports.length}</span>
-                  <p class="text-[9px] text-slate-400 mt-2">Yêu cầu bảo trì tệp</p>
-                </div>
-              </div>
-
-              <!-- Thao tác nhanh & Nguồn Seed mẫu -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-4 rounded-xl space-y-3 flex flex-col justify-between">
-                  <h3 class="font-bold text-xs flex items-center gap-1.5"><i data-lucide="sliders" class="w-4 h-4 text-blue-500"></i> Phím tắt quản trị viên</h3>
-                  <div class="grid grid-cols-2 gap-2 text-xs">
-                    <button onclick="openAddPdfModal()" class="flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-lg font-bold transition-all shadow-sm">
-                      <i data-lucide="plus" class="w-4 h-4"></i> Thêm PDF mới
+                <form onsubmit="handleAddCategory(event)" class="flex gap-2">
+                    <input type="text" id="new-cat-name" placeholder="Tên danh mục..." required class="flex-1 text-xs bg-slate-50 border border-slate-200 px-3.5 py-2.5 rounded-xl focus:bg-white focus:border-brand-500 focus:outline-none transition-all">
+                    <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-4.5 py-2.5 rounded-xl text-xs transition flex items-center gap-1 shadow-md shadow-brand-500/10 shrink-0">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>Thêm</span>
                     </button>
-                    <button onclick="openAddCatModal()" class="flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 p-2 rounded-lg font-bold transition-all">
-                      <i data-lucide="folder-plus" class="w-4 h-4"></i> Thêm Danh mục
-                    </button>
-                    <button onclick="setAdminSubTab('pdfs')" class="flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 p-2 rounded-lg font-bold text-slate-700 dark:text-slate-300 transition-all">
-                      <i data-lucide="list" class="w-4 h-4"></i> Quản lý tệp
-                    </button>
-                    <button onclick="setAdminSubTab('reports')" class="flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 p-2 rounded-lg font-bold text-slate-700 dark:text-slate-300 transition-all relative">
-                      <i data-lucide="alert-circle" class="w-4 h-4"></i> Phản hồi lỗi ${reports.length > 0 ? `<span class="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full"></span>` : ''}
-                    </button>
-                  </div>
-                </div>
+                </form>
 
-                <div class="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-4 rounded-xl space-y-3">
-                  <h3 class="font-bold text-xs flex items-center gap-1.5"><i data-lucide="database" class="w-4 h-4 text-emerald-500"></i> Seed dữ liệu mẫu</h3>
-                  <p class="text-[11px] text-slate-400 leading-relaxed">Nếu cơ sở dữ liệu trống, click nút để khởi tạo tức thì các danh mục cùng giáo trình chuẩn bị sẵn.</p>
-                  <button onclick="window.seedSystemSamples()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg font-bold text-xs transition-all flex items-center gap-1 w-full justify-center">
-                    <i data-lucide="play" class="w-3.5 h-3.5"></i> Gieo dữ liệu mẫu ngay
-                  </button>
+                <hr class="border-slate-100">
+
+                <div class="overflow-y-auto max-h-[300px] pr-1">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                <th class="pb-2">Tên nhóm</th>
+                                <th class="pb-2 text-right">Lệnh</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-category-rows" class="text-xs">
+                            <!-- JS tự nạp hàng -->
+                        </tbody>
+                    </table>
                 </div>
-              </div>
             </div>
-          `;
-        case 'pdfs':
-          return `
-            <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h2 class="text-sm font-black">Danh sách giáo trình & tài liệu</h2>
-                  <p class="text-[10px] text-slate-400 mt-0.5">Quản trị và tải trực tiếp tệp PDF</p>
-                </div>
-                <button onclick="openAddPdfModal()" class="flex items-center gap-1 bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm">
-                  <i data-lucide="plus" class="w-3.5 h-3.5"></i> Thêm PDF mới
-                </button>
-              </div>
 
-              <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase tracking-wider font-bold">
-                      <th class="py-2 px-1">Tài liệu</th>
-                      <th class="py-2 px-1">Chuyên mục</th>
-                      <th class="py-2 px-1">Lượt xem</th>
-                      <th class="py-2 px-1 text-right">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
-                    ${pdfs.map(pdf => {
-                      const cat = categories.find(c => c.id === pdf.categoryId);
-                      return `
-                        <tr>
-                          <td class="py-2.5 px-1 max-w-xs">
-                            <span class="font-bold truncate text-slate-950 dark:text-white block">${pdf.title}</span>
-                            <span class="text-[10px] text-slate-400 truncate block">${pdf.pdfUrl}</span>
-                          </td>
-                          <td class="py-2.5 px-1">
-                            ${cat ? `<span class="px-1.5 py-0.5 rounded font-bold" style="background-color: ${cat.color}15; color: ${cat.color}">${cat.name}</span>` : 'Trống'}
-                          </td>
-                          <td class="py-2.5 px-1 font-mono text-slate-400">${pdf.views || 0}</td>
-                          <td class="py-2.5 px-1 text-right space-x-1.5">
-                            <button onclick="openEditPdfModal('${pdf.id}')" class="p-1 hover:text-blue-500"><i data-lucide="edit" class="w-3.5 h-3.5 inline"></i></button>
-                            <button onclick="window.deletePdfDoc('${pdf.id}')" class="p-1 hover:text-rose-500"><i data-lucide="trash" class="w-3.5 h-3.5 inline"></i></button>
-                          </td>
-                        </tr>
-                      `;
-                    }).join('')}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          `;
-        case 'categories':
-          return `
-            <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h2 class="text-sm font-black">Danh mục tài liệu</h2>
-                  <p class="text-[10px] text-slate-400 mt-0.5">Sắp xếp các chuyên mục chính</p>
-                </div>
-                <button onclick="openAddCatModal()" class="flex items-center gap-1 bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all">
-                  <i data-lucide="plus" class="w-3.5 h-3.5"></i> Thêm Danh mục
-                </button>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                ${categories.map(cat => `
-                  <div class="border border-slate-200 dark:border-slate-800 rounded-lg p-3 flex justify-between items-center bg-slate-50 dark:bg-slate-950">
-                    <div class="flex items-center gap-2">
-                      <span class="w-3 h-3 rounded-full" style="background-color: ${cat.color}"></span>
-                      <div>
-                        <h4 class="font-bold text-slate-950 dark:text-white">${cat.name}</h4>
-                        <p class="text-[10px] text-slate-400">Thứ tự ưu tiên: ${cat.order || 0}</p>
-                      </div>
+            <!-- Quản lý Tài liệu PDF (2/3) - CỐ ĐỊNH CHIỀU CAO HIỂN THỊ TỐI ĐA 5 BÀI + THANH CUỘN -->
+            <div class="xl:col-span-2 bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm flex flex-col gap-4 max-h-[500px]">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 flex-shrink-0">
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-900 mb-0.5 uppercase tracking-wider text-slate-400">Hồ sơ bài viết PDF</h3>
+                        <p class="text-[11px] text-slate-500">Cập nhật nội dung, tải tài liệu mới lên máy.</p>
                     </div>
-                    <div class="flex items-center gap-1">
-                      <button onclick="openEditCatModal('${cat.id}')" class="p-1.5 hover:text-blue-500"><i data-lucide="edit" class="w-3.5 h-3.5"></i></button>
-                      <button onclick="window.deleteCatDoc('${cat.id}')" class="p-1.5 hover:text-rose-500"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          `;
-        case 'reports':
-          return `
-            <div class="space-y-4">
-              <div>
-                <h2 class="text-sm font-black">Phản hồi lỗi tải từ độc giả</h2>
-                <p class="text-[10px] text-slate-400 mt-0.5">Giám sát tính nguyên vẹn của link tài liệu</p>
-              </div>
+                    <button onclick="openAddArticleModal()" class="bg-gradient-to-r from-brand-600 to-indigo-650 hover:from-brand-500 hover:to-indigo-550 text-white font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-brand-500/15">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                        <span>Đăng tài liệu</span>
+                    </button>
+                </div>
 
-              ${reports.length === 0 ? `
-                <p class="text-center text-slate-400 py-10">Không có phản hồi lỗi nào được ghi nhận.</p>
-              ` : `
-                <div class="space-y-3">
-                  ${reports.map(rep => `
-                    <div class="bg-rose-500/5 border border-rose-500/10 p-3.5 rounded-xl space-y-2 relative text-xs">
-                      <h4 class="font-bold text-rose-500 flex items-center gap-1.5">
-                        <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-                        Lỗi tại tài liệu: "${rep.pdfTitle}"
-                      </h4>
-                      <p class="p-2.5 rounded bg-slate-100 dark:bg-slate-950 font-mono text-slate-600 dark:text-slate-300">${rep.reason}</p>
-                      <div class="flex justify-between items-center text-[10px] text-slate-400">
-                        <span>Gửi vào: ${new Date(rep.createdAt).toLocaleString('vi-VN')}</span>
-                        <button onclick="window.dismissReport('${rep.id}')" class="bg-white dark:bg-slate-800 text-blue-600 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded font-bold">
-                          Đã xử lý xong (Xóa phản hồi)
+                <div class="overflow-y-auto border border-slate-100 rounded-xl pr-1 flex-1 max-h-[340px]">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 bg-white z-10 shadow-sm">
+                            <tr class="border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                <th class="py-2.5 px-3">Tên tài liệu</th>
+                                <th class="py-2.5 px-3">Nhóm danh mục</th>
+                                <th class="py-2.5 px-3 text-center">Lượt xem</th>
+                                <th class="py-2.5 px-3">Ngày đăng</th>
+                                <th class="py-2.5 px-3 text-right">Tác vụ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-articles-rows" class="text-xs divide-y divide-slate-100">
+                            <!-- JS nạp hàng tài liệu -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- TRÌNH ĐỌC PDF THIẾT KẾ MỚI (VIEW PDF MODAL CHỐNG CHÓI, MỜ NỀN CHUYÊN NGHIỆP, KHỚP MỌI THIẾT BỊ) -->
+    <div id="view-reader" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xl items-center justify-center p-2 sm:p-6 transition-all duration-300">
+        <div class="bg-slate-900 border border-slate-800/80 rounded-3xl w-full max-w-6xl h-[92vh] flex flex-col overflow-hidden shadow-2xl relative">
+            
+            <!-- Header Thanh điều khiển mờ nhẹ phong cách tối giản sang trọng -->
+            <header class="bg-slate-900 border-b border-slate-800/60 px-4 py-3.5 flex items-center justify-between gap-4 z-10 shrink-0">
+                <div class="flex items-center gap-3 min-w-0">
+                    <button onclick="closeReader()" class="hover:bg-slate-800 text-slate-400 hover:text-white p-2 rounded-xl transition-all duration-200 shrink-0" title="Quay về danh sách">
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    </button>
+                    <div class="truncate">
+                        <h3 id="reader-doc-title" class="text-xs sm:text-sm font-bold text-white truncate max-w-xs sm:max-w-md">Tiêu đề tài liệu đang mở</h3>
+                        <p id="reader-doc-meta" class="text-[10px] text-slate-400 mt-0.5 truncate uppercase tracking-wider font-semibold">Danh mục • Ngày xuất bản</p>
+                    </div>
+                </div>
+
+                <!-- Điều khiển trang thông minh -->
+                <div class="hidden md:flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800/80">
+                    <button onclick="scrollToPrevPage()" class="text-slate-400 hover:text-white transition disabled:opacity-30 disabled:cursor-not-allowed" title="Trang trước">
+                        <i data-lucide="chevron-up" class="w-4 h-4"></i>
+                    </button>
+                    <span class="text-xs font-semibold text-slate-300">Trang</span>
+                    <input type="number" id="reader-page-input" value="1" min="1" class="w-12 text-center text-xs bg-slate-900 border border-slate-850 rounded py-0.5 text-white font-bold focus:outline-none focus:border-brand-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" onchange="jumpToPage(this.value)">
+                    <span class="text-xs text-slate-500">/ <span id="reader-total-pages" class="font-bold">1</span></span>
+                    <button onclick="scrollToNextPage()" class="text-slate-400 hover:text-white transition disabled:opacity-30 disabled:cursor-not-allowed" title="Trang kế">
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <!-- Các nút tác vụ: Phóng to, Thu nhỏ, Toggle Sidebar, In ấn, Tải về -->
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <!-- Zoom Controls -->
+                    <div class="flex items-center bg-slate-950 px-2 py-1 rounded-xl border border-slate-800">
+                        <button onclick="changeZoom(-0.25)" class="text-slate-400 hover:text-white p-1 rounded transition" title="Thu nhỏ">
+                            <i data-lucide="minus" class="w-3.5 h-3.5"></i>
                         </button>
-                      </div>
+                        <span id="reader-zoom-percent" class="text-[10px] font-bold px-2 text-slate-300 min-w-[45px] text-center">125%</span>
+                        <button onclick="changeZoom(0.25)" class="text-slate-400 hover:text-white p-1 rounded transition" title="Phóng to">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                        </button>
                     </div>
-                  `).join('')}
+                    
+                    <!-- Sidebar Toggle Button (Mục lục) -->
+                    <button onclick="toggleReaderSidebar()" class="bg-slate-850 hover:bg-slate-800 text-slate-300 hover:text-white p-2 rounded-xl transition flex items-center justify-center" title="Bật/Tắt mục lục trang">
+                        <i data-lucide="sidebar" class="w-4 h-4"></i>
+                    </button>
+
+                    <div class="w-px h-6 bg-slate-800 mx-1"></div>
+
+                    <!-- Printer -->
+                    <button onclick="printPdfDocument()" class="bg-slate-850 hover:bg-slate-850 text-slate-300 hover:text-white p-2 rounded-xl transition flex items-center justify-center" title="In trực tiếp tài liệu này">
+                        <i data-lucide="printer" class="w-4 h-4"></i>
+                    </button>
+
+                    <!-- Download -->
+                    <button id="reader-download-btn" class="bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition flex items-center gap-1 shadow-md shadow-brand-500/10">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                        <span class="hidden sm:inline">Tải về</span>
+                    </button>
                 </div>
-              `}
+            </header>
+
+            <!-- Khung chính chia làm Sidebar Mục lục và Khu vực đọc PDF thích ứng -->
+            <div class="flex-1 flex overflow-hidden">
+                <!-- Sidebar mục lục danh sách trang bên trái -->
+                <aside id="reader-sidebar" class="w-64 bg-slate-900 border-r border-slate-800/60 flex flex-col transition-all duration-300 shrink-0">
+                    <div class="p-4 border-b border-slate-800/60 flex items-center justify-between shrink-0">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                            <i data-lucide="layers" class="w-4 h-4 text-brand-500"></i>
+                            <span>Danh sách trang</span>
+                        </span>
+                    </div>
+                    <div id="reader-sidebar-pages" class="flex-1 overflow-y-auto p-3 flex flex-col gap-2 bg-slate-900/40">
+                        <!-- Nạp nhanh danh sách trang bằng JS -->
+                    </div>
+                </aside>
+
+                <!-- Khu vực chứa Canvas hiển thị PDF cuộn mượt, co giãn khớp mọi thiết bị -->
+                <main class="flex-1 overflow-y-auto bg-slate-950 p-4 sm:p-8 flex flex-col items-center scroll-smooth" id="pdf-scroll-container">
+                    <div id="pdf-pages-container" class="w-full flex flex-col items-center gap-8 max-w-full">
+                        <!-- Canvas vẽ các trang PDF sẽ tự scale max-w-full h-auto qua CSS -->
+                    </div>
+                </main>
             </div>
-          `;
-      }
-    };
+        </div>
+    </div>
 
-    // --- ADMIN ACTION HANDLERS (CRUD) ---
-    // Xóa tài liệu
-    window.deletePdfDoc = async (id) => {
-      if (!window.confirm("Bạn có chắc chắn muốn xóa tài liệu này khỏi cơ sở dữ liệu?")) return;
-      try {
-        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'pdfs', id));
-      } catch (err) { console.error(err); }
-    };
-
-    // Xóa danh mục
-    window.deleteCatDoc = async (id) => {
-      if (!window.confirm("Xóa danh mục sẽ ảnh hưởng đến việc phân loại các tài liệu liên quan. Vẫn tiếp tục?")) return;
-      try {
-        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'categories', id));
-      } catch (err) { console.error(err); }
-    };
-
-    // Xóa báo cáo lỗi
-    window.dismissReport = async (id) => {
-      try {
-        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', id));
-      } catch (err) { console.error(err); }
-    };
-
-    // --- HÀM TRỢ GIÚP UPLOAD LÊN STORAGE ---
-    const uploadFileToStorage = (file, folderPath) => {
-      return new Promise((resolve, reject) => {
-        const fileRef = ref(storage, `${appId}/${folderPath}/${Date.now()}_${file.name}`);
-        const uploadTask = uploadBytesResumable(fileRef, file);
-        
-        // Hiện progress bar tương ứng trong form
-        const progressContainer = document.getElementById('uploadProgressArea');
-        const progressBar = document.getElementById('uploadProgressBar');
-        const progressText = document.getElementById('uploadProgressText');
-        
-        if (progressContainer) progressContainer.classList.remove('hidden');
-
-        uploadTask.on('state_changed', 
-          (snapshot) => {
-            const percent = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            if (progressBar) progressBar.style.width = percent + '%';
-            if (progressText) progressText.textContent = `Đang tải lên Storage: ${Math.round(percent)}%`;
-          }, 
-          (error) => {
-            console.error("Upload error:", error);
-            if (progressContainer) progressContainer.classList.add('hidden');
-            reject(error);
-          }, 
-          () => {
-            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-              if (progressContainer) progressContainer.classList.add('hidden');
-              resolve(downloadURL);
-            });
-          }
-        );
-      });
-    };
-
-    // --- FORM MODAL: ADD/EDIT GENERAL SYSTEM ---
-    const showEntityModal = (title, formHtml, sizeClass = 'max-w-md') => {
-      document.getElementById('entityModalTitle').textContent = title;
-      document.getElementById('entityModalFormContainer').innerHTML = formHtml;
-      
-      // Reset & gán class kích thước linh hoạt
-      const modalDialog = document.getElementById('entityModal').firstElementChild;
-      modalDialog.className = `bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 w-full ${sizeClass} shadow-xl relative text-xs my-8 transition-all duration-300`;
-      
-      document.getElementById('entityModal').classList.remove('hidden');
-      document.getElementById('entityModal').classList.add('flex');
-      lucide.createIcons();
-    };
-
-    window.closeEntityModal = () => {
-      document.getElementById('entityModal').classList.remove('flex');
-      document.getElementById('entityModal').classList.add('hidden');
-    };
-
-    // Cập nhật nhãn khi chọn file
-    window.updateFileLabel = (input, labelId, fileType) => {
-      const file = input.files[0];
-      const label = document.getElementById(labelId);
-      if (label && file) {
-        label.textContent = `${fileType}: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
-        label.classList.add('text-blue-600', 'dark:text-blue-400');
-      }
-    };
-
-    // MODAL PDF (THÊM / SỬA - Thiết kế lại bố cục lưới 2 cột chống xê dịch)
-    window.openAddPdfModal = () => {
-      const html = `
-        <form id="pdfForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Cột Trái: Thông tin văn bản -->
-          <div class="space-y-3">
-            <div>
-              <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">Tiêu đề tài liệu</label>
-              <input type="text" id="pdfTitle" required class="w-full border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:border-blue-500 font-medium text-xs" placeholder="Ví dụ: Giáo trình điện tử cơ bản" />
+    <!-- HỘP THOẠI ĐĂNG NHẬP ADMIN -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-100 flex flex-col">
+            <div class="p-6 bg-slate-900 text-white relative">
+                <button onclick="toggleAuthModal(false)" class="absolute right-4 top-4 hover:bg-white/15 text-slate-400 hover:text-white p-1 rounded-full transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="bg-brand-600 p-2.5 rounded-2xl">
+                        <i data-lucide="lock" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <h3 class="text-base font-bold">Xác thực tài khoản Admin</h3>
+                </div>
+                <p class="text-xs text-slate-450">Tài khoản quản trị được cấp quyền trực tiếp qua bảng điều khiển Firebase Auth.</p>
             </div>
             
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">Danh mục</label>
-                <select id="pdfCatId" required class="w-full border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-800 focus:outline-none text-xs">
-                  <option value="">Chọn danh mục</option>
-                  ${categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
-                </select>
-              </div>
-              <div>
-                <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">Trạng thái</label>
-                <select id="pdfStatus" class="w-full border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-800 focus:outline-none text-xs">
-                  <option value="public">Công khai</option>
-                  <option value="draft">Bản nháp</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">Mô tả chi tiết</label>
-              <textarea id="pdfDesc" rows="5" class="w-full border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-800 focus:outline-none resize-none text-xs" placeholder="Nhập tóm tắt sơ lược về nội dung giáo trình..."></textarea>
-            </div>
-          </div>
-
-          <!-- Cột Phải: Tệp tin và Cấu hình -->
-          <div class="space-y-3 flex flex-col justify-between">
-            <div class="space-y-3">
-              <!-- Upload tệp PDF từ máy tính -->
-              <div>
-                <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
-                  <i data-lucide="file-text" class="w-3.5 h-3.5 text-blue-500"></i> Tập tin PDF (*.pdf)
-                </label>
-                <div class="relative border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 transition-all rounded-lg p-3.5 bg-slate-50 dark:bg-slate-800 text-center cursor-pointer group">
-                  <input type="file" id="pdfFileInput" required accept="application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="window.updateFileLabel(this, 'pdfFileLabel', 'PDF')" />
-                  <i data-lucide="upload-cloud" class="w-5 h-5 text-slate-400 group-hover:text-blue-500 mx-auto mb-1"></i>
-                  <span id="pdfFileLabel" class="text-[10px] text-slate-500 font-bold block truncate">Nhấn để chọn tệp PDF của bạn</span>
+            <form onsubmit="handleAuthSubmit(event)" class="p-6 flex flex-col gap-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Email quản trị viên</label>
+                    <input type="email" id="auth-username" placeholder="Nhập địa chỉ email quản trị viên..." required class="w-full text-xs bg-slate-50 border border-slate-250/70 px-4 py-3.5 rounded-2xl focus:bg-white focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/10 transition-all">
                 </div>
-              </div>
-
-              <!-- Upload ảnh bìa Thumbnail -->
-              <div>
-                <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
-                  <i data-lucide="image" class="w-3.5 h-3.5 text-indigo-500"></i> Ảnh đại diện / Thumbnail
-                </label>
-                <div class="relative border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-500 transition-all rounded-lg p-3.5 bg-slate-50 dark:bg-slate-800 text-center cursor-pointer group">
-                  <input type="file" id="pdfThumbInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="window.updateFileLabel(this, 'pdfThumbLabel', 'Bìa')" />
-                  <i data-lucide="image" class="w-5 h-5 text-slate-400 group-hover:text-indigo-500 mx-auto mb-1"></i>
-                  <span id="pdfThumbLabel" class="text-[10px] text-slate-500 font-bold block truncate">Nhấn để chọn ảnh bìa</span>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Mật khẩu</label>
+                    <input type="password" id="auth-password" placeholder="Nhập mật khẩu..." required class="w-full text-xs bg-slate-50 border border-slate-250/70 px-4 py-3.5 rounded-2xl focus:bg-white focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/10 transition-all">
                 </div>
-              </div>
+                <button type="submit" class="w-full mt-2 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2.5 text-xs uppercase tracking-wider">
+                    <i data-lucide="unlock" class="w-4 h-4"></i>
+                    <span>Đăng Nhập Hệ Thống</span>
+                </button>
+            </form>
+        </div>
+    </div>
 
-              <!-- Tiến trình tải lên Storage -->
-              <div id="uploadProgressArea" class="hidden space-y-1 bg-slate-50 dark:bg-slate-950 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
-                <div class="flex justify-between text-[9px] text-slate-400">
-                  <span id="uploadProgressText" class="font-bold text-blue-500">Đang chuẩn bị...</span>
+    <!-- HỘP THOẠI ĐĂNG BÀI VIẾT / TÀI LIỆU MỚI -->
+    <div id="article-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl border border-slate-100 flex flex-col">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="bg-brand-50 text-brand-600 p-2.5 rounded-xl">
+                        <i data-lucide="file-plus" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 id="article-modal-title" class="text-sm font-bold text-slate-900">Đăng tài liệu PDF mới</h3>
+                        <p class="text-xs text-slate-400">File được render chuẩn độ nét cao.</p>
+                    </div>
                 </div>
-                <div class="w-full bg-slate-200 dark:bg-slate-850 rounded-full h-1.5 overflow-hidden">
-                  <div id="uploadProgressBar" class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full w-0 transition-all"></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Cấu hình tùy chọn và Nút lưu -->
-            <div>
-              <div class="flex items-center gap-4 py-2 border-t border-slate-100 dark:border-slate-800 mb-2">
-                <label class="flex items-center gap-1.5 cursor-pointer">
-                  <input type="checkbox" id="pdfFeatured" class="rounded text-blue-600 focus:ring-blue-500" />
-                  <span class="font-bold text-slate-600 dark:text-slate-400">Ghim tiêu biểu</span>
-                </label>
-                <label class="flex items-center gap-1.5 cursor-pointer">
-                  <input type="checkbox" id="pdfAllowDownload" checked class="rounded text-blue-600 focus:ring-blue-500" />
-                  <span class="font-bold text-slate-600 dark:text-slate-400">Cho tải về</span>
-                </label>
-              </div>
-              <button type="submit" id="savePdfBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg font-bold transition-all shadow-sm">Lưu tài liệu</button>
-            </div>
-          </div>
-        </form>
-      `;
-      showEntityModal("Thêm Tài liệu PDF mới", html, 'max-w-2xl');
-
-      document.getElementById('pdfForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const submitBtn = document.getElementById('savePdfBtn');
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Đang tải tệp lên Storage...";
-
-        const pdfFile = document.getElementById('pdfFileInput').files[0];
-        const thumbFile = document.getElementById('pdfThumbInput').files[0];
-
-        try {
-          if (!pdfFile) {
-            alert("Vui lòng lựa chọn tệp PDF tải lên.");
-            submitBtn.disabled = false;
-            return;
-          }
-
-          // 1. Upload PDF
-          const pdfUrl = await uploadFileToStorage(pdfFile, 'pdf_files');
-
-          // 2. Upload Thumbnail (nếu có)
-          let thumbnailUrl = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&auto=format&fit=crop&q=60";
-          if (thumbFile) {
-            thumbnailUrl = await uploadFileToStorage(thumbFile, 'thumbnails');
-          }
-
-          const data = {
-            title: document.getElementById('pdfTitle').value,
-            slug: generateSlug(document.getElementById('pdfTitle').value),
-            description: document.getElementById('pdfDesc').value,
-            categoryId: document.getElementById('pdfCatId').value,
-            pdfUrl: pdfUrl,
-            thumbnail: thumbnailUrl,
-            featured: document.getElementById('pdfFeatured').checked,
-            allowDownload: document.getElementById('pdfAllowDownload').checked,
-            status: document.getElementById('pdfStatus').value,
-            views: 0,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          };
-
-          await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'pdfs'), data);
-          closeEntityModal();
-        } catch (err) { 
-          alert("Lỗi upload: " + err.message); 
-        } finally {
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Lưu tài liệu";
-        }
-      };
-    };
-
-    window.openEditPdfModal = (id) => {
-      const pdf = pdfs.find(p => p.id === id);
-      if (!pdf) return;
-
-      const html = `
-        <form id="pdfForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Cột Trái -->
-          <div class="space-y-3">
-            <div>
-              <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">Tiêu đề tài liệu</label>
-              <input type="text" id="pdfTitle" required value="${pdf.title}" class="w-full border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-800 text-xs" />
+                <button onclick="closeArticleModal()" class="hover:bg-slate-100 text-slate-400 hover:text-slate-600 p-1.5 rounded-full transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
             
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">Danh mục</label>
-                <select id="pdfCatId" required class="w-full border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-800 text-xs">
-                  ${categories.map(c => `<option value="${c.id}" ${pdf.categoryId === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}
-                </select>
-              </div>
-              <div>
-                <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">Trạng thái</label>
-                <select id="pdfStatus" class="w-full border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-800 text-xs">
-                  <option value="public" ${pdf.status === 'public' ? 'selected' : ''}>Công khai</option>
-                  <option value="draft" ${pdf.status === 'draft' ? 'selected' : ''}>Bản nháp</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1">Mô tả chi tiết</label>
-              <textarea id="pdfDesc" rows="5" class="w-full border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-800 focus:outline-none resize-none text-xs">${pdf.description}</textarea>
-            </div>
-          </div>
-
-          <!-- Cột Phải -->
-          <div class="space-y-3 flex flex-col justify-between">
-            <div class="space-y-3">
-              <div>
-                <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
-                  <i data-lucide="file-text" class="w-3.5 h-3.5 text-blue-500"></i> Thay thế tệp PDF mới (Nếu muốn)
-                </label>
-                <div class="relative border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-500 transition-all rounded-lg p-3 bg-slate-50 dark:bg-slate-800 text-center cursor-pointer group">
-                  <input type="file" id="pdfFileInput" accept="application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="window.updateFileLabel(this, 'pdfFileLabel', 'PDF')" />
-                  <i data-lucide="upload-cloud" class="w-5 h-5 text-slate-400 group-hover:text-blue-500 mx-auto mb-1"></i>
-                  <span id="pdfFileLabel" class="text-[10px] text-slate-500 font-bold block truncate">Chọn tệp PDF khác</span>
+            <form id="form-article" onsubmit="handleArticleSubmit(event)" class="p-6 flex flex-col gap-4">
+                <input type="hidden" id="edit-article-id" value="">
+                
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Tiêu đề bài viết / tài liệu</label>
+                    <input type="text" id="article-title" placeholder="Tiêu đề hiển thị..." required class="w-full text-xs bg-slate-50 border border-slate-200 px-4 py-3 rounded-2xl focus:bg-white focus:border-brand-500 focus:outline-none transition-all">
                 </div>
-                <span class="text-[9px] text-slate-400 mt-1 block truncate">Đường dẫn hiện tại: ${pdf.pdfUrl}</span>
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
-                  <i data-lucide="image" class="w-3.5 h-3.5 text-indigo-500"></i> Thay thế ảnh bìa mới (Nếu muốn)
-                </label>
-                <div class="relative border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-indigo-500 transition-all rounded-lg p-3 bg-slate-50 dark:bg-slate-800 text-center cursor-pointer group">
-                  <input type="file" id="pdfThumbInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="window.updateFileLabel(this, 'pdfThumbLabel', 'Bìa')" />
-                  <i data-lucide="image" class="w-5 h-5 text-slate-400 group-hover:text-indigo-500 mx-auto mb-1"></i>
-                  <span id="pdfThumbLabel" class="text-[10px] text-slate-500 font-bold block truncate">Chọn ảnh bìa khác</span>
+                
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Sơ lược mô tả ngắn</label>
+                    <textarea id="article-desc" rows="3" placeholder="Viết mô tả ngắn gọn..." required class="w-full text-xs bg-slate-50 border border-slate-200 px-4 py-3 rounded-2xl focus:bg-white focus:border-brand-500 focus:outline-none transition-all resize-none"></textarea>
                 </div>
-              </div>
 
-              <!-- Tiến trình tải lên Storage -->
-              <div id="uploadProgressArea" class="hidden space-y-1 bg-slate-50 dark:bg-slate-950 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
-                <div class="flex justify-between text-[9px] text-slate-400">
-                  <span id="uploadProgressText" class="font-bold text-blue-500">Đang chuẩn bị...</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Chọn chuyên mục</label>
+                        <select id="article-category" required class="w-full text-xs bg-slate-50 border border-slate-200 px-4 py-3 rounded-2xl focus:bg-white focus:border-brand-500 focus:outline-none transition-all">
+                            <!-- Options -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">File tài liệu (.pdf)</label>
+                        <div class="relative w-full">
+                            <input type="file" id="article-file" accept="application/pdf" class="hidden">
+                            <button type="button" onclick="document.getElementById('article-file').click()" class="w-full text-xs text-slate-750 bg-slate-50 border border-slate-200 px-4 py-3 rounded-2xl hover:bg-slate-100 transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="upload" class="w-4 h-4 text-slate-400"></i>
+                                <span id="file-upload-status" class="truncate max-w-[150px]">Tải file từ máy...</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="w-full bg-slate-200 dark:bg-slate-850 rounded-full h-1.5 overflow-hidden">
-                  <div id="uploadProgressBar" class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full w-0 transition-all"></div>
+
+                <!-- Box xem trước file tải lên -->
+                <div id="file-info-box" class="hidden p-3 bg-emerald-50 text-emerald-800 text-xs rounded-xl flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+                        <span id="uploaded-filename" class="font-bold truncate max-w-[250px]">tai-lieu.pdf</span>
+                    </div>
+                    <button type="button" onclick="removeUploadedFile()" class="text-emerald-700 hover:text-emerald-950 font-bold">Xóa</button>
                 </div>
-              </div>
+
+                <div class="flex gap-3 mt-4">
+                    <button type="button" onclick="closeArticleModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-655 font-bold py-3.5 rounded-2xl transition text-xs border border-slate-250/60">Hủy bỏ</button>
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3.5 rounded-2xl transition shadow-lg shadow-emerald-500/15 text-xs flex items-center justify-center gap-2">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        <span id="btn-submit-text">Xuất bản</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- HỘP THOẠI XÁC NHẬN XÓA -->
+    <div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-100 flex flex-col p-6">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-rose-100 text-rose-650 mb-4">
+                    <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-sm font-bold text-slate-900 mb-2">Xác nhận thao tác xóa?</h3>
+                <p id="confirm-message" class="text-xs text-slate-500">Mọi hành động sau khi xóa sẽ không thể phục hồi dữ liệu ban đầu.</p>
             </div>
-
-            <div>
-              <div class="flex items-center gap-4 py-2 border-t border-slate-100 dark:border-slate-800 mb-2">
-                <label class="flex items-center gap-1.5 cursor-pointer">
-                  <input type="checkbox" id="pdfFeatured" ${pdf.featured ? 'checked' : ''} class="rounded text-blue-600 focus:ring-blue-500" />
-                  <span class="font-bold text-slate-600 dark:text-slate-400">Ghim tiêu biểu</span>
-                </label>
-                <label class="flex items-center gap-1.5 cursor-pointer">
-                  <input type="checkbox" id="pdfAllowDownload" ${pdf.allowDownload ? 'checked' : ''} class="rounded text-blue-600 focus:ring-blue-500" />
-                  <span class="font-bold text-slate-600 dark:text-slate-400">Cho tải về</span>
-                </label>
-              </div>
-              <button type="submit" id="savePdfBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg font-bold transition-all">Cập nhật tài liệu</button>
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeConfirmModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl transition text-xs">Hủy</button>
+                <button id="btn-confirm-delete" class="flex-1 bg-gradient-to-r from-rose-600 to-red-650 hover:from-rose-500 hover:to-red-550 text-white font-bold py-2.5 rounded-xl transition shadow-lg shadow-rose-500/10 text-xs">Đồng ý xóa</button>
             </div>
-          </div>
-        </form>
-      `;
-      showEntityModal("Sửa thông tin PDF", html, 'max-w-2xl');
+        </div>
+    </div>
 
-      document.getElementById('pdfForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const submitBtn = document.getElementById('savePdfBtn');
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Đang tải dữ liệu...";
-
-        const pdfFile = document.getElementById('pdfFileInput').files[0];
-        const thumbFile = document.getElementById('pdfThumbInput').files[0];
-
-        try {
-          let updatedPdfUrl = pdf.pdfUrl;
-          if (pdfFile) {
-            updatedPdfUrl = await uploadFileToStorage(pdfFile, 'pdf_files');
-          }
-
-          let updatedThumbUrl = pdf.thumbnail;
-          if (thumbFile) {
-            updatedThumbUrl = await uploadFileToStorage(thumbFile, 'thumbnails');
-          }
-
-          const data = {
-            title: document.getElementById('pdfTitle').value,
-            slug: generateSlug(document.getElementById('pdfTitle').value),
-            description: document.getElementById('pdfDesc').value,
-            categoryId: document.getElementById('pdfCatId').value,
-            pdfUrl: updatedPdfUrl,
-            thumbnail: updatedThumbUrl,
-            featured: document.getElementById('pdfFeatured').checked,
-            allowDownload: document.getElementById('pdfAllowDownload').checked,
-            status: document.getElementById('pdfStatus').value,
-            updatedAt: new Date().toISOString()
-          };
-
-          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'pdfs', id), data);
-          closeEntityModal();
-        } catch (err) { 
-          alert("Lỗi khi cập nhật tài liệu: " + err.message); 
-        } finally {
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Cập nhật tài liệu";
-        }
-      };
-    };
-
-    // MODAL DANH MỤC (THÊM / SỬA)
-    window.openAddCatModal = () => {
-      const html = `
-        <form id="catForm" class="space-y-3">
-          <div>
-            <label class="block font-bold text-slate-500 mb-1">Tên danh mục</label>
-            <input type="text" id="catName" required class="w-full border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-800" placeholder="Công nghệ phần mềm..." />
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block font-bold text-slate-500 mb-1">Màu sắc</label>
-              <input type="color" id="catColor" value="#3b82f6" class="w-full border border-slate-200 dark:border-slate-700 rounded-lg h-9 bg-slate-50 cursor-pointer" />
+    <!-- MODAL CHÍNH SÁCH BẢO MẬT -->
+    <div id="privacy-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl border border-slate-100 flex flex-col">
+            <div class="p-6 border-b border-slate-150 flex items-center justify-between bg-slate-50">
+                <h3 class="text-base font-bold text-slate-900">Chính Sách Bảo Mật Thông Tin</h3>
+                <button onclick="togglePrivacyModal(false)" class="hover:bg-slate-200 text-slate-400 hover:text-slate-600 p-1 rounded-full transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
-            <div>
-              <label class="block font-bold text-slate-500 mb-1">Thứ tự hiển thị</label>
-              <input type="number" id="catOrder" required value="1" class="w-full border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-800" />
+            <div class="p-6 overflow-y-auto max-h-[400px] text-xs text-slate-650 leading-relaxed space-y-4">
+                <p class="font-bold text-slate-900 text-sm">1. Quyền xem và đọc tài liệu dành cho khách hàng</p>
+                <p>Khách hàng khi truy cập vào hệ thống SmartPDF được cấp quyền xem, đọc và tải về các tài liệu PDF đã được xuất bản hoàn toàn miễn phí. Khách hàng đóng vai trò là người tiếp nhận thông tin và tuyệt đối không có quyền tự ý sửa đổi, thêm mới, tải tệp tin lên hệ thống, hay can thiệp vào cơ sở dữ liệu thuộc quyền quản trị viên.</p>
+                <p class="font-bold text-slate-900 text-sm">2. Nguyên tắc Không thu thập thông tin khách hàng</p>
+                <p>SmartPDF hoạt động trên tiêu chí tự do tiếp cận nguồn tài liệu số chất lượng cao. Chúng tôi cam kết **không thu thập bất kỳ thông tin cá nhân nào** của khách hàng (bao gồm họ tên, email, số điện thoại, vị trí hoặc hành vi duyệt web). Bạn có thể an tâm đọc tài liệu mà không cần phải thực hiện bất kỳ thủ tục khai báo thông tin phiền toái nào.</p>
+                <p class="font-bold text-slate-900 text-sm">3. Bảo mật của tài khoản Quản trị</p>
+                <p>Dữ liệu đăng nhập và các khóa phiên hoạt động của quản trị viên (Admin) được lưu trữ hoàn toàn khép kín trên trình duyệt hiện tại và không được chia sẻ với bất cứ bên thứ ba nào nhằm bảo đảm an toàn dữ liệu hệ thống.</p>
             </div>
-          </div>
-          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg font-bold">Lưu danh mục</button>
-        </form>
-      `;
-      showEntityModal("Thêm Danh mục mới", html, 'max-w-md');
+            <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+                <button onclick="togglePrivacyModal(false)" class="bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition shadow-md shadow-brand-500/10">Đã Hiểu</button>
+            </div>
+        </div>
+    </div>
 
-      document.getElementById('catForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const data = {
-          name: document.getElementById('catName').value,
-          slug: generateSlug(document.getElementById('catName').value),
-          color: document.getElementById('catColor').value,
-          order: Number(document.getElementById('catOrder').value)
+    <!-- MODAL ĐIỀU KHOẢN SỬ DỤNG -->
+    <div id="terms-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl border border-slate-100 flex flex-col">
+            <div class="p-6 border-b border-slate-150 flex items-center justify-between bg-slate-50">
+                <h3 class="text-base font-bold text-slate-900">Điều Khoản Sử Dụng Dịch Vụ</h3>
+                <button onclick="toggleTermsModal(false)" class="hover:bg-slate-200 text-slate-400 hover:text-slate-600 p-1 rounded-full transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-[400px] text-xs text-slate-650 leading-relaxed space-y-4">
+                <p class="font-bold text-slate-900 text-sm">1. Giới hạn hành vi khách đọc</p>
+                <p>Trang web SmartPDF là nơi cung cấp tri thức học thuật mở trực quan. Khách hàng sử dụng dịch vụ xem tài liệu có nghĩa vụ tuân thủ các quy định về quyền sở hữu trí tuệ của tài liệu đã đăng tải.</p>
+                <p class="font-bold text-slate-900 text-sm">2. Nghiêm cấm tuyệt đối các hành vi sử dụng mục đích xấu</p>
+                <p>Chúng tôi nghiêm cấm tất cả hành vi lợi dụng tài liệu trên trang web vào các mục đích xấu, bao gồm nhưng không giới hạn ở: sao chép để lừa đảo trục lợi tài chính, chỉnh sửa bóp méo nội dung để xuyên tạc thông tin, đăng tải lại tệp tin chứa virus hay mã độc hoặc sử dụng tài liệu phục vụ cho các hoạt động vi phạm pháp luật nước Cộng hòa Xã hội Chủ nghĩa Việt Nam.</p>
+                <p class="font-bold text-slate-900 text-sm">3. Quyền hạn cập nhật thông tin</p>
+                <p>Khách hàng hiểu và đồng ý rằng chỉ có Ban quản trị (Admin) đã được định danh mới có quyền quyết định thêm, bớt hoặc biên tập lại các chuyên mục cũng như tệp tài liệu PDF hiện diện trên trang web.</p>
+            </div>
+            <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+                <button onclick="toggleTermsModal(false)" class="bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition shadow-md shadow-brand-500/10">Chấp Thuận</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHÂN TRANG (FOOTER - MÀU SẮC ĐẬM CHỐNG CHÓI SANG TRỌNG) -->
+    <footer class="bg-slate-950 border-t border-slate-900 py-8 text-slate-450 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2.5">
+                <div class="bg-brand-600 text-white p-1.5 rounded-lg flex items-center justify-center shadow-lg shadow-brand-500/15">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253"></path>
+                    </svg>
+                </div>
+                <span class="text-sm font-bold text-white tracking-wider">SmartPDF</span>
+                <span class="text-xs text-slate-500">© 2026. Thư viện tư liệu học tập an toàn, lành mạnh.</span>
+            </div>
+            <div class="flex gap-6 text-xs text-slate-400 font-semibold">
+                <button onclick="togglePrivacyModal(true)" class="hover:text-white transition-colors duration-200">Chính sách bảo mật</button>
+                <button onclick="toggleTermsModal(true)" class="hover:text-white transition-colors duration-200">Điều khoản sử dụng</button>
+                <a href="tel:19006138" class="hover:text-white transition-colors duration-200">Hỗ trợ: 19006138</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- KỊCH BẢN CHỨA LOGIC XỬ LÝ & KẾT NỐI FIREBASE -->
+    <script type="module">
+        // Import Firebase modules từ CDN
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithEmailAndPassword, onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Cấu hình Firebase do người dùng cung cấp
+        const firebaseConfig = {
+            apiKey: "AIzaSyBxVjCofmTO3C6IZDynA91UUWZ6iEvj-RY",
+            authDomain: "huongdanhotro-d56de.firebaseapp.com",
+            projectId: "huongdanhotro-d56de",
+            storageBucket: "huongdanhotro-d56de.firebasestorage.app",
+            messagingSenderId: "651625894464",
+            appId: "1:651625894464:web:b63d52413b5d278f2705a5",
+            measurementId: "G-B6N72RHYC2"
         };
-        try {
-          await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'categories'), data);
-          closeEntityModal();
-        } catch (err) { alert(err.message); }
-      };
-    };
 
-    window.openEditCatModal = (id) => {
-      const cat = categories.find(c => c.id === id);
-      if (!cat) return;
+        // Khởi tạo ứng dụng
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'huongdanhotro-d56de';
 
-      const html = `
-        <form id="catForm" class="space-y-3">
-          <div>
-            <label class="block font-bold text-slate-500 mb-1">Tên danh mục</label>
-            <input type="text" id="catName" required value="${cat.name}" class="w-full border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-800" />
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block font-bold text-slate-500 mb-1">Màu sắc</label>
-              <input type="color" id="catColor" value="${cat.color || '#3b82f6'}" class="w-full border border-slate-200 dark:border-slate-700 rounded-lg h-9 bg-slate-50 cursor-pointer" />
-            </div>
-            <div>
-              <label class="block font-bold text-slate-500 mb-1">Thứ tự hiển thị</label>
-              <input type="number" id="catOrder" required value="${cat.order || 1}" class="w-full border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-800" />
-            </div>
-          </div>
-          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg font-bold">Cập nhật danh mục</button>
-        </form>
-      `;
-      showEntityModal("Sửa thông tin Danh mục", html, 'max-w-md');
-
-      document.getElementById('catForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const data = {
-          name: document.getElementById('catName').value,
-          slug: generateSlug(document.getElementById('catName').value),
-          color: document.getElementById('catColor').value,
-          order: Number(document.getElementById('catOrder').value)
-        };
-        try {
-          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'categories', id), data);
-          closeEntityModal();
-        } catch (err) { alert(err.message); }
-      };
-    };
-
-    // --- MODAL: BÁO CÁO LỖI TÀI LIỆU ---
-    window.openReportModal = (pdfId, pdfTitle) => {
-      document.getElementById('reportPdfId').value = pdfId;
-      document.getElementById('reportPdfTitle').value = pdfTitle;
-      document.getElementById('reportReason').value = '';
-      document.getElementById('reportModal').classList.remove('hidden');
-      document.getElementById('reportModal').classList.add('flex');
-    };
-
-    window.closeReportModal = () => {
-      document.getElementById('reportModal').classList.remove('flex');
-      document.getElementById('reportModal').classList.add('hidden');
-    };
-
-    window.submitReport = async (e) => {
-      e.preventDefault();
-      const pdfId = document.getElementById('reportPdfId').value;
-      const pdfTitle = document.getElementById('reportPdfTitle').value;
-      const reason = document.getElementById('reportReason').value;
-
-      try {
-        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'reports'), {
-          pdfId,
-          pdfTitle,
-          reason,
-          createdAt: new Date().toISOString()
-        });
-        alert("Báo cáo lỗi thành công! Đội ngũ kỹ thuật sẽ hỗ trợ kiểm tra lại tài liệu.");
-        closeReportModal();
-      } catch (err) {
-        alert("Lỗi khi gửi báo cáo: " + err.message);
-      }
-    };
-
-    // --- MODAL: ĐỔI MẬT KHẨU ADMIN ---
-    window.openChangePasswordModal = () => {
-      const html = `
-        <form id="passForm" class="space-y-3">
-          <div>
-            <label class="block font-bold text-slate-500 mb-1">Mật khẩu mới</label>
-            <input type="password" id="newAdminPassword" required class="w-full border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-800" placeholder="Nhập ít nhất 6 ký tự" />
-          </div>
-          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg font-bold">Cập nhật mật khẩu</button>
-        </form>
-      `;
-      showEntityModal("Đổi mật khẩu Quản trị viên", html, 'max-w-sm');
-
-      document.getElementById('passForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const newPass = document.getElementById('newAdminPassword').value;
-        if (newPass.length < 6) {
-          alert("Mật khẩu mới phải từ 6 ký tự trở lên!");
-          return;
-        }
-        try {
-          await updatePassword(auth.currentUser, newPass);
-          alert("Đổi mật khẩu quản trị viên thành công!");
-          closeEntityModal();
-        } catch (err) {
-          alert("Lỗi đổi mật khẩu: " + err.message);
-        }
-      };
-    };
-
-    // --- SEED SYSTEM SAMPLES (CHỈ DÀNH CHO ADMIN BAN ĐẦU - Đã loại bỏ Bài viết mâu) ---
-    window.seedSystemSamples = async () => {
-      if (!isAdmin) {
-        alert("Bạn phải đăng nhập tài khoản Admin demo để thực hiện quy trình này.");
-        return;
-      }
-
-      const cats = [
-        { name: "Công nghệ thông tin", slug: "cong-nghe-thong-tin", color: "#3B82F6", order: 1 },
-        { name: "Kinh tế & Marketing", slug: "kinh-te-marketing", color: "#10B981", order: 2 },
-        { name: "Ngoại ngữ & Kỹ năng", slug: "ngoai-ngu-ky-nang", color: "#8B5CF6", order: 3 }
-      ];
-
-      try {
-        const catIds = [];
-        for (let cat of cats) {
-          const docRef = await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'categories'), cat);
-          catIds.push(docRef.id);
-        }
-
-        const pdfSamples = [
-          {
-            title: "Giáo trình Lập trình ReactJS Toàn tập",
-            slug: "giao-trinh-lap-trinh-reactjs-toan-tap",
-            description: "Tài liệu lý thuyết và bài tập thực hành dành cho kỹ sư phát triển phần mềm React.",
-            categoryId: catIds[0],
-            pdfUrl: "https://arxiv.org/pdf/2103.14151.pdf",
-            thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=500&auto=format&fit=crop&q=60",
-            views: 120,
-            featured: true,
-            allowDownload: true,
-            status: "public",
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          },
-          {
-            title: "Cẩm nang Digital Marketing Xu thế mới",
-            slug: "cam-nang-digital-marketing-xu-the-moi",
-            description: "Các kiến thức cập nhật về tối ưu hóa công cụ tìm kiếm và phân tích số liệu.",
-            categoryId: catIds[1],
-            pdfUrl: "https://arxiv.org/pdf/1706.03762.pdf",
-            thumbnail: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&auto=format&fit=crop&q=60",
-            views: 85,
-            featured: false,
-            allowDownload: false,
-            status: "public",
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
+        // CƠ SỞ DỮ LIỆU BAN ĐẦU (Dùng làm dữ liệu seed nếu dữ liệu trên Firestore trống)
+        let categories = [
+            { id: 'cat-1', name: 'Công nghệ & Lập trình' },
+            { id: 'cat-2', name: 'Kinh doanh & Khởi nghiệp' },
+            { id: 'cat-3', name: 'Khoa học & Đời sống' }
         ];
 
-        for (let pdf of pdfSamples) {
-          await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'pdfs'), pdf);
+        const defaultSamplePdfB64 = 'data:application/pdf;base64,JVBERi0xLjQKMSAwIG9iagogIDw8IC9UeXBlIC9DYXRhbG9nCiAgICAgL1BhZ2VzIDIgMCBSCiAgPj4KZW5kb2JqCjIgMCBvYmoKICA8PCAvVHlwZSAvUGFnZXMKICAgICAvS2lkcyBbIDMgMCBSIF0KICAgICAvQ291bnQgMQogID4+CmVuZG9iagozIDAgb2JqCiAgPDwgL1R5BlIC9QYWdlCiAgICAgL1BhcmVudCAyIDAgUgogICAgIC9NZWRpYUJveCBbIDAgMCA1OTUgODQyIF0KICAgICAvQ291bnQgNCAwIFIKICAgICAvUXVlc3Rpb25zIDUgMCBSCiAgPj4KZW5kb2JqCjQgMCBvYmoKICA8PCAvTGVuZ3RoIDcwID4+CnN0cmVhbQpCVAovRjEgMTggVGYKNTAgNzAwIFRkCihIdW9uZyBkYW4gTGFwIHRyaW5oIFdlYiBIaWVuIGRhaSAyMDI2IC0gVGFpIGxpZXUgbWF1LikgVGoKRVQKZW5kc3RyZWFtCmVuZG9iago1IDAgb2JqCiAgPDwgL0ZvbnQgPDwgL0YxIDYgMCBSID4+ID4+CmVuZG9iago2IDAgb2JqCiAgPDwgL1R5BlIC9Gb250CiAgICAgL1N1YnR5cGUgL1R5cGUxCiAgICAgL0Jhc2VGb250IC9IZWx2ZXRpY2EKICA+PgplbmRvYmoKeHJlZgowIDcKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMTk5IDAwMDAwIG4gCjAwMDAwMDAwNzAgMDAwMDAgbCAKMDAwMDAwMDE0MCAwMDAwMCBuIAowMDAwMDAwMjU2IDAwMDAwIG4gCjAwMDAwMDAzNzcgMDAwMDAgbCAKMDAwMDAwMDQyNiAwMDAwMCBuIAp0cmFpbGVyCiAgPDwgL1MpemUgNwogICAgIC9Sb290IDEgMCBSCiAgPj4Kc3RhcnR4cmVmCjUyMAolJUVPRg==';
+
+        let articles = [
+            { id: 'art-1', title: 'Kỷ Nguyên Lập Trình Web Hiện Đại Với React & Node', description: 'Tài liệu chi tiết phân tích xu hướng phát triển giao diện đơn trang tối ưu SEO và cấu trúc kết xuất phía máy chủ trong tương lai.', categoryId: 'cat-1', pdfData: defaultSamplePdfB64, fileName: 'ky_nguyen_web.pdf', uploadDate: '2026-06-10', views: 142 },
+            { id: 'art-2', title: 'Hành Trình Xây Dựng Thương Hiệu Cho Doanh Nghiệp Nhỏ', description: 'Cẩm nang thực chiến gồm 10 bước xây dựng bộ nhận diện cốt lõi tối thiểu tài nguyên nhưng mang lại hiệu ứng lan tỏa lớn.', categoryId: 'cat-2', pdfData: defaultSamplePdfB64, fileName: 'xay_dung_thuong_hieu.pdf', uploadDate: '2026-06-11', views: 89 },
+            { id: 'art-3', title: 'Hệ Sinh Thái Rạn San Hô & Biến Đổi Khí Hậu Toàn Cầu', description: 'Báo cáo khoa học tổng hợp dữ liệu nhiệt độ đại dương ảnh hưởng tiêu cực thế nào đến rạn san hô nhiệt đới ven bờ.', categoryId: 'cat-3', pdfData: defaultSamplePdfB64, fileName: 'he_sinh_thai_san_ho.pdf', uploadDate: '2026-06-12', views: 54 },
+            { id: 'art-4', title: 'Giáo Trình Cấu Trúc Dữ Liệu Và Giải Thuật Ứng Dụng', description: 'Giới thiệu các giải thuật tìm kiếm, sắp xếp và các dạng đồ thị cơ bản phục vụ phát triển ứng dụng hiệu suất cao.', categoryId: 'cat-1', pdfData: defaultSamplePdfB64, fileName: 'cau_truc_du_lieu.pdf', uploadDate: '2026-06-05', views: 213 },
+            { id: 'art-5', title: 'Cẩm Nang Quản Trị Tài Chính Doanh Nghiệp Startup', description: 'Phân tích dòng tiền, lập kế hoạch chi tiêu, dự báo doanh thu và xây dựng phương án gọi vốn đầu tư.', categoryId: 'cat-2', pdfData: defaultSamplePdfB64, fileName: 'tai_chinh_startup.pdf', uploadDate: '2026-06-06', views: 76 },
+            { id: 'art-6', title: 'Tìm Hiểu Về Năng Lượng Tái Tạo Và Xu Thế Tương Lai', description: 'Khảo sát điện mặt trời, điện gió và công nghệ sản xuất hydro xanh trên phạm vi toàn cầu.', categoryId: 'cat-3', pdfData: defaultSamplePdfB64, fileName: 'nang_luong_tai_tao.pdf', uploadDate: '2026-06-07', views: 105 },
+            { id: 'art-7', title: 'Nhập Môn Trí Tuệ Nhân Tạo & Học Máy Cho Người Mới', description: 'Cung cấp góc nhìn thực tiễn về thuật toán Supervised Learning, Unsupervised Learning và Mạng nơ-ron.', categoryId: 'cat-1', pdfData: defaultSamplePdfB64, fileName: 'nhap_mon_ai.pdf', uploadDate: '2026-06-01', views: 320 },
+            { id: 'art-8', title: 'Nghệ Thuật Đàm Phán Và Chốt Deal Trong Kinh Doanh', description: 'Phân tích tâm lý đối tác và các chiến thuật thuyết phục giúp nâng cao tỷ lệ ký kết hợp đồng thương mại.', categoryId: 'cat-2', pdfData: defaultSamplePdfB64, fileName: 'nghe_thuat_dam_phan.pdf', uploadDate: '2026-06-02', views: 98 },
+            { id: 'art-9', title: 'Thiết Kế Đồ Họa 3D Với Blender & Quy Trình Dựng Hình', description: 'Từng bước hướng dẫn dựng mẫu vật thể, áp chất liệu và kết xuất ánh sáng tối ưu hóa phần cứng.', categoryId: 'cat-1', pdfData: defaultSamplePdfB64, fileName: 'blender_3d.pdf', uploadDate: '2026-05-28', views: 184 },
+            { id: 'art-10', title: 'Sinh Học Phân Tử Và Ứng Dụng Trị Liệu Gen', description: 'Phân tích sự tiến bộ của kỹ thuật chỉnh sửa gen CRISPR và hy vọng điều trị triệt để các bệnh di truyền.', categoryId: 'cat-3', pdfData: defaultSamplePdfB64, fileName: 'tri_lieu_gen.pdf', uploadDate: '2026-05-25', views: 65 }
+        ];
+
+        // BIẾN TOÀN CỤC TRẠNG THÁI (STATE)
+        let currentView = 'home';
+        let currentSelectedCategory = 'all';
+        let searchQuery = '';
+        let sortKey = 'newest';
+        let isAdmin = false;
+        let currentUser = null;
+        
+        // Quản lý trang (Phân trang 6 bài)
+        let currentPage = 1;
+        const itemsPerPage = 6;
+
+        // Trạng thái PDF.js
+        let currentPdfDoc = null;
+        let currentPdfScale = 1.25;
+        let currentOpenedArticle = null;
+        let isReaderSidebarOpen = true;
+
+        // Trạng thái tệp tải lên
+        let fileUploadBase64 = '';
+        let fileUploadName = '';
+
+        // ĐIỀU HƯỚNG CHUYỂN CẢNH LẬP TỨC
+        function navigateTo(viewName) {
+            if (viewName === 'admin' && !isAdmin) {
+                showToast('Bạn cần đăng nhập bằng quyền Admin trước!', 'warning');
+                toggleAuthModal(true);
+                return;
+            }
+
+            const currentActiveEl = document.getElementById(`view-${currentView}`);
+            const nextActiveEl = document.getElementById(`view-${viewName}`);
+
+            currentActiveEl.classList.add('hidden');
+            nextActiveEl.classList.remove('hidden');
+
+            currentView = viewName;
+
+            window.scrollTo({ top: 0 });
+            renderApp();
         }
 
-        alert("Seeding thành công! Dữ liệu mẫu đã xuất hiện trên trang chủ.");
-      } catch (err) {
-        alert("Lỗi seeding: " + err.message);
-      }
-    };
+        // ĐỒNG BỘ DỮ LIỆU THỜI GIAN THỰC TỪ FIREBASE (FIRESTORE)
+        let isListening = false;
+        let unsubscribeCategories = null;
+        let unsubscribeArticles = null;
 
-    // --- DARK MODE CONTROLLER ---
-    window.toggleDarkMode = () => {
-      const docClass = document.documentElement.classList;
-      const themeIcon = document.getElementById('themeIcon');
-      if (docClass.contains('dark')) {
-        docClass.remove('dark');
-        localStorage.setItem('theme', 'light');
-        themeIcon.setAttribute('data-lucide', 'moon');
-      } else {
-        docClass.add('dark');
-        localStorage.setItem('theme', 'dark');
-        themeIcon.setAttribute('data-lucide', 'sun');
-      }
-      lucide.createIcons();
-    };
+        const setupFirestoreListeners = () => {
+            if (!currentUser) return;
+            if (isListening) return;
 
-    // Thiết lập chế độ tối mặc định nếu có sẵn cấu hình từ trước
-    if (localStorage.getItem('theme') === 'dark') {
-      document.documentElement.classList.add('dark');
-    }
+            // Định nghĩa Collection Refs theo đúng RULE 1
+            const catRef = collection(db, 'artifacts', appId, 'public', 'data', 'categories');
+            const artRef = collection(db, 'artifacts', appId, 'public', 'data', 'articles');
 
-    // Khởi tạo luồng xác thực và render trang chính
-    initAuth();
+            // Lắng nghe Danh mục
+            unsubscribeCategories = onSnapshot(catRef, (snapshot) => {
+                let fetchedCats = [];
+                snapshot.forEach(docSnap => {
+                    fetchedCats.push({ id: docSnap.id, ...docSnap.data() });
+                });
 
-  </script>
+                if (fetchedCats.length === 0) {
+                    // Thực hiện Seed dữ liệu nếu DB trống rỗng
+                    categories.forEach(async (cat) => {
+                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'categories', cat.id), {
+                            name: cat.name
+                        });
+                    });
+                } else {
+                    categories = fetchedCats;
+                }
+                renderApp();
+            }, (error) => {
+                console.error("Categories listener error: ", error);
+            });
 
-  <!-- Helper tạo slug viết gọn bằng JS -->
-  <script>
-    const generateSlug = (text) => {
-      return text
-        .toString()
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '') // Xóa dấu tiếng Việt
-        .replace(/[đĐ]/g, 'd')
-        .replace(/([^0-9a-z-\s])/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-+/, '')
-        .replace(/-+$/, '');
-    };
-  </script>
+            // Lắng nghe Bài viết
+            unsubscribeArticles = onSnapshot(artRef, (snapshot) => {
+                let fetchedArts = [];
+                snapshot.forEach(docSnap => {
+                    fetchedArts.push({ id: docSnap.id, ...docSnap.data() });
+                });
 
+                if (fetchedArts.length === 0) {
+                    // Seed dữ liệu bài viết
+                    articles.forEach(async (art) => {
+                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'articles', art.id), {
+                            title: art.title,
+                            description: art.description,
+                            categoryId: art.categoryId,
+                            pdfData: art.pdfData,
+                            fileName: art.fileName,
+                            uploadDate: art.uploadDate,
+                            views: art.views
+                        });
+                    });
+                } else {
+                    articles = fetchedArts;
+                }
+                renderApp();
+            }, (error) => {
+                console.error("Articles listener error: ", error);
+            });
+
+            isListening = true;
+        };
+
+        // KHỞI CHẠY AUTH HỆ THỐNG TRÊN THIẾT LẬP (RULE 3)
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    if (!auth.currentUser) {
+                        await signInAnonymously(auth);
+                    }
+                }
+            } catch (error) {
+                console.error("Auth initialization error: ", error);
+            }
+        };
+
+        // Lắng nghe thay đổi xác thực
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (user) {
+                // Admin thực sự sẽ không phải tài khoản vô danh (Anonymous)
+                isAdmin = !user.isAnonymous;
+            } else {
+                isAdmin = false;
+                await signInAnonymously(auth);
+            }
+            renderApp();
+            setupFirestoreListeners();
+        });
+
+        // BỘ ĐIỀU PHỐI VẼ LẠI GIAO DIỆN CHÍNH
+        function renderApp() {
+            const btnAdminPanel = document.getElementById('btn-admin-panel');
+            const btnAuth = document.getElementById('btn-auth');
+            const authIcon = document.getElementById('auth-icon');
+            const authText = document.getElementById('auth-text');
+
+            if (isAdmin) {
+                btnAdminPanel.classList.remove('hidden');
+                authText.innerText = 'Đăng xuất';
+                authIcon.setAttribute('data-lucide', 'log-out');
+            } else {
+                btnAdminPanel.classList.add('hidden');
+                authText.innerText = 'Admin';
+                authIcon.setAttribute('data-lucide', 'log-in');
+            }
+            lucide.createIcons();
+
+            if (currentView === 'home') {
+                renderHomeCategories();
+                renderHomeArticles();
+            } else if (currentView === 'admin') {
+                renderAdminCategories();
+                renderAdminArticles();
+                updateAdminStats();
+            }
+        }
+
+        // ==========================================
+        // PHÂN HỆ TRANG CHỦ & PHÂN LOẠI (USER PORTAL)
+        // ==========================================
+
+        function renderHomeCategories() {
+            const listContainer = document.getElementById('category-sidebar-list');
+            listContainer.innerHTML = '';
+
+            // Nút "Tất cả danh mục" thiết kế bo góc rộng rãi, tránh dính sát
+            const allBtn = document.createElement('button');
+            allBtn.onclick = () => selectCategory('all');
+            allBtn.className = `w-full text-left px-5 py-4 rounded-2xl text-xs font-bold transition-all duration-300 flex items-center justify-between flex-shrink-0 group ${currentSelectedCategory === 'all' ? 'bg-gradient-to-r from-brand-600 to-indigo-650 text-white shadow-lg shadow-brand-500/20' : 'hover:bg-slate-100 text-slate-600 bg-slate-50 border border-slate-200/50'}`;
+            
+            const totalCount = articles.length;
+            allBtn.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-xl bg-slate-200 text-slate-600 transition-colors group-hover:bg-white group-hover:text-brand-600 ${currentSelectedCategory === 'all' ? 'bg-white/20 text-white' : ''}">
+                        <i data-lucide="layout-grid" class="w-4 h-4 shrink-0"></i>
+                    </div>
+                    <span>Tất cả danh mục</span>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold ${currentSelectedCategory === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'}">${totalCount}</span>
+            `;
+            listContainer.appendChild(allBtn);
+
+            // Các danh mục con
+            categories.forEach(cat => {
+                const catBtn = document.createElement('button');
+                catBtn.onclick = () => selectCategory(cat.id);
+                catBtn.className = `w-full text-left px-5 py-4 rounded-2xl text-xs font-bold transition-all duration-300 flex items-center justify-between flex-shrink-0 group ${currentSelectedCategory === cat.id ? 'bg-gradient-to-r from-brand-600 to-indigo-650 text-white shadow-lg shadow-brand-500/20' : 'hover:bg-slate-100 text-slate-600 bg-slate-50 border border-slate-200/50'}`;
+                
+                const count = articles.filter(a => a.categoryId === cat.id).length;
+                catBtn.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 rounded-xl bg-slate-200 text-slate-600 transition-colors group-hover:bg-white group-hover:text-brand-600 ${currentSelectedCategory === cat.id ? 'bg-white/20 text-white' : ''}">
+                            <i data-lucide="folder" class="w-4 h-4 shrink-0"></i>
+                        </div>
+                        <span>${cat.name}</span>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold ${currentSelectedCategory === cat.id ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'}">${count}</span>
+                `;
+                listContainer.appendChild(catBtn);
+            });
+            lucide.createIcons();
+        }
+
+        // Chọn danh mục
+        function selectCategory(catId) {
+            currentSelectedCategory = catId;
+            currentPage = 1;
+            const badge = document.getElementById('current-filter-badge');
+            
+            if (catId === 'all') {
+                badge.innerText = 'Tất cả';
+            } else {
+                const found = categories.find(c => c.id === catId);
+                badge.innerText = found ? found.name : 'Vô danh';
+            }
+            renderApp();
+        }
+
+        // Sắp xếp bài viết thay đổi
+        function handleSortChange() {
+            sortKey = document.getElementById('sort-select').value;
+            renderHomeArticles();
+        }
+
+        // RENDER DANH SÁCH BÀI VIẾT (USER VIEW + PHÂN TRANG)
+        function renderHomeArticles() {
+            const grid = document.getElementById('articles-grid');
+            const emptyState = document.getElementById('empty-state');
+            grid.innerHTML = '';
+
+            let filtered = [...articles];
+
+            // 1. Thực hiện Lọc theo Danh mục
+            if (currentSelectedCategory !== 'all') {
+                filtered = filtered.filter(a => a.categoryId === currentSelectedCategory);
+            }
+
+            // 2. Lọc theo Từ khóa Tìm kiếm
+            if (searchQuery !== '') {
+                const query = searchQuery.toLowerCase();
+                filtered = filtered.filter(a => 
+                    a.title.toLowerCase().includes(query) || 
+                    a.description.toLowerCase().includes(query)
+                );
+            }
+
+            // 3. Sắp xếp dữ liệu (Hỗ trợ tiếng Việt mượt mà)
+            if (sortKey === 'newest') {
+                filtered.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
+            } else if (sortKey === 'oldest') {
+                filtered.sort((a, b) => new Date(a.uploadDate) - new Date(b.uploadDate));
+            } else if (sortKey === 'views-desc') {
+                filtered.sort((a, b) => b.views - a.views);
+            } else if (sortKey === 'views-asc') {
+                filtered.sort((a, b) => a.views - b.views);
+            } else if (sortKey === 'title-asc') {
+                filtered.sort((a, b) => a.title.localeCompare(b.title, 'vi'));
+            } else if (sortKey === 'title-desc') {
+                filtered.sort((a, b) => b.title.localeCompare(a.title, 'vi'));
+            }
+
+            document.getElementById('articles-count').innerText = `Tìm thấy ${filtered.length} tài liệu`;
+
+            if (filtered.length === 0) {
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                renderPagination(0);
+                return;
+            }
+
+            grid.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            if (currentPage > totalPages) currentPage = totalPages || 1;
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedItems = filtered.slice(startIndex, endIndex);
+
+            paginatedItems.forEach(art => {
+                const catObj = categories.find(c => c.id === art.categoryId) || { name: 'Chưa phân loại' };
+                
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl border border-slate-200/80 overflow-hidden hover:shadow-2xl hover:border-brand-400 transition-all duration-300 flex flex-col h-[330px] justify-between group";
+                
+                card.innerHTML = `
+                    <!-- Cover Card -->
+                    <div onclick="openPdfReader('${art.id}')" class="h-28 bg-gradient-to-tr from-slate-100 to-indigo-50 flex items-center justify-center relative overflow-hidden p-4 group-hover:from-brand-50 group-hover:to-indigo-100/45 transition-all duration-300 cursor-pointer">
+                        <div class="absolute right-0 bottom-0 text-slate-300/40 font-black text-6xl select-none translate-x-2 translate-y-3 group-hover:text-brand-500/10 transition-all duration-300">PDF</div>
+                        <div class="z-10 bg-white p-3 rounded-2xl shadow-md border border-slate-200/60 flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform duration-300">
+                            <i data-lucide="file-text" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Content Info -->
+                    <div class="p-5 flex-1 flex flex-col justify-between">
+                        <div class="flex flex-col gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-indigo-50 text-indigo-700 text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">${catObj.name}</span>
+                                <span class="text-[9px] text-slate-400 font-extrabold">• ${art.uploadDate}</span>
+                            </div>
+                            <h4 onclick="openPdfReader('${art.id}')" class="font-extrabold text-xs text-slate-900 group-hover:text-brand-600 cursor-pointer transition-all duration-200 line-clamp-2 leading-relaxed" title="${art.title}">
+                                ${art.title}
+                            </h4>
+                            <p class="text-[11px] text-slate-500 line-clamp-2 leading-relaxed font-light">${art.description}</p>
+                        </div>
+                        
+                        <div class="flex items-center justify-between border-t border-slate-100 pt-3 text-[11px] text-slate-455">
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="eye" class="w-4 h-4 text-slate-350"></i>
+                                <span>${art.views} lượt đọc</span>
+                            </span>
+                            <button onclick="openPdfReader('${art.id}')" class="bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold px-4 py-2 rounded-xl transition duration-200 flex items-center gap-1.5 shadow-md shadow-brand-500/10 text-[10px] uppercase tracking-wider">
+                                <span>Đọc ngay</span>
+                                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            lucide.createIcons();
+
+            renderPagination(totalPages);
+        }
+
+        // ==========================================
+        // PHÂN HỆ QUẢN TRỊ ADMIN (ADMIN VIEW LOGIC)
+        // ==========================================
+
+        function updateAdminStats() {
+            document.getElementById('stat-total-articles').innerText = articles.length;
+            document.getElementById('stat-total-categories').innerText = categories.length;
+            const sumViews = articles.reduce((acc, curr) => acc + (curr.views || 0), 0);
+            document.getElementById('stat-total-views').innerText = sumViews;
+        }
+
+        function renderAdminCategories() {
+            const tbody = document.getElementById('admin-category-rows');
+            tbody.innerHTML = '';
+
+            categories.forEach(cat => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-100 hover:bg-slate-50 transition-colors";
+                
+                tr.innerHTML = `
+                    <td class="py-2.5 px-2 font-semibold text-slate-800">${cat.name}</td>
+                    <td class="py-2.5 px-2 text-right">
+                        <div class="flex justify-end gap-1.5">
+                            <button onclick="editCategory('${cat.id}')" class="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition" title="Đổi tên">
+                                <i data-lucide="edit" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deleteCategory('${cat.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Xóa bỏ">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        async function editCategory(catId) {
+            const cat = categories.find(c => c.id === catId);
+            if (!cat) return;
+
+            const container = document.getElementById('toast-container');
+            const promptBox = document.createElement('div');
+            promptBox.className = "p-5 bg-white border border-slate-200 rounded-3xl shadow-2xl flex flex-col gap-3 max-w-sm pointer-events-auto border-brand-200";
+            promptBox.innerHTML = `
+                <div>
+                    <h4 class="font-bold text-slate-900 text-xs">Biên tập lại danh mục</h4>
+                    <p class="text-[11px] text-slate-500 mt-1">Sửa tên cho nhóm "${cat.name}":</p>
+                </div>
+                <input type="text" id="prompt-cat-input" value="${cat.name}" class="w-full text-xs bg-slate-50 border border-slate-200 px-3 py-2.5 rounded-xl focus:bg-white focus:outline-none">
+                <div class="flex gap-2 justify-end">
+                    <button id="btn-prompt-cancel" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-bold px-3 py-1.5 rounded-lg transition">Hủy</button>
+                    <button id="btn-prompt-save" class="bg-gradient-to-r from-brand-600 to-indigo-650 text-white text-[10px] font-bold px-3.5 py-1.5 rounded-lg transition shadow-md shadow-brand-500/10">Cập nhật</button>
+                </div>
+            `;
+            container.appendChild(promptBox);
+            document.getElementById('prompt-cat-input').focus();
+
+            document.getElementById('btn-prompt-cancel').onclick = () => promptBox.remove();
+            document.getElementById('btn-prompt-save').onclick = async () => {
+                const newName = document.getElementById('prompt-cat-input').value.trim();
+                if (newName !== '') {
+                    try {
+                        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'categories', catId), {
+                            name: newName
+                        });
+                        promptBox.remove();
+                        showToast('Đã sửa tên danh mục thành công!', 'success');
+                    } catch (err) {
+                        showToast('Lỗi lưu danh mục!', 'error');
+                    }
+                } else {
+                    showToast('Vui lòng không bỏ trống!', 'error');
+                }
+            };
+        }
+
+        async function deleteCategory(catId) {
+            const cat = categories.find(c => c.id === catId);
+            if (!cat) return;
+
+            openConfirmModal(`Bạn có chắc chắn muốn xóa danh mục "${cat.name}" không? Tất cả tài liệu thuộc danh mục này sẽ chuyển về nhóm "Chưa phân loại".`, async () => {
+                try {
+                    // Cập nhật các bài viết thuộc danh mục bị xóa
+                    const updatePromises = articles
+                        .filter(art => art.categoryId === catId)
+                        .map(art => updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'articles', art.id), {
+                            categoryId: ''
+                        }));
+                    
+                    await Promise.all(updatePromises);
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'categories', catId));
+                    showToast('Đã dọn dẹp danh mục thành công!', 'success');
+                } catch (err) {
+                    showToast('Lỗi xóa danh mục!', 'error');
+                }
+            });
+        }
+
+        async function handleAddCategory(event) {
+            event.preventDefault();
+            const input = document.getElementById('new-cat-name');
+            const name = input.value.trim();
+
+            if (categories.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+                showToast('Tên nhóm danh mục này đã tồn tại rồi!', 'warning');
+                return;
+            }
+
+            const newId = 'cat-' + Date.now();
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'categories', newId), {
+                    name: name
+                });
+                input.value = '';
+                showToast('Đã thêm danh mục mới thành công!', 'success');
+            } catch (err) {
+                showToast('Không thể thêm danh mục!', 'error');
+            }
+        }
+
+        // BIÊN TẬP FORM BÀI VIẾT
+        async function handleArticleSubmit(event) {
+            event.preventDefault();
+            const editId = document.getElementById('edit-article-id').value;
+            const title = document.getElementById('article-title').value.trim();
+            const desc = document.getElementById('article-desc').value.trim();
+            const categoryId = document.getElementById('article-category').value;
+
+            if (!fileUploadBase64) {
+                showToast('Vui lòng đính kèm một file tài liệu PDF từ máy tính!', 'error');
+                return;
+            }
+
+            try {
+                if (editId) {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'articles', editId), {
+                        title: title,
+                        description: desc,
+                        categoryId: categoryId,
+                        pdfData: fileUploadBase64,
+                        fileName: fileUploadName
+                    });
+                    showToast('Đã cập nhật tài liệu PDF!', 'success');
+                } else {
+                    const newId = 'art-' + Date.now();
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'articles', newId), {
+                        title: title,
+                        description: desc,
+                        categoryId: categoryId,
+                        pdfData: fileUploadBase64,
+                        fileName: fileUploadName,
+                        uploadDate: new Date().toISOString().split('T')[0],
+                        views: 0
+                    });
+                    showToast('Đã đăng tài liệu mới lên Firestore!', 'success');
+                }
+                closeArticleModal();
+            } catch (err) {
+                showToast('Lỗi ghi dữ liệu tài liệu!', 'error');
+            }
+        }
+
+        async function deleteArticle(artId) {
+            const art = articles.find(a => a.id === artId);
+            if (!art) return;
+
+            openConfirmModal(`Bạn có thực sự muốn xóa vĩnh viễn tài liệu "${art.title}"?`, async () => {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'articles', artId));
+                    showToast('Đã gỡ bỏ tài liệu khỏi hệ thống!', 'success');
+                } catch (err) {
+                    showToast('Lỗi xóa tài liệu!', 'error');
+                }
+            });
+        }
+
+        // ==========================================
+        // XÁC THỰC ADMIN & LOGOUT
+        // ==========================================
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-username').value.trim();
+            const pass = document.getElementById('auth-password').value.trim();
+
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                toggleAuthModal(false);
+                showToast('Xác thực thành công! Quyền quản trị đã kích hoạt.', 'success');
+                navigateTo('admin');
+            } catch (err) {
+                showToast('Sai thông tin tài khoản hoặc mật khẩu Auth!', 'error');
+            }
+        }
+
+        async function logoutAdmin() {
+            try {
+                await signOut(auth);
+                // Hệ thống tự động chuyển lại tài khoản khách Anonymous sau đó
+            } catch (err) {
+                showToast('Lỗi khi đăng xuất!', 'error');
+            }
+        }
+
+        // ==========================================
+        // TRÌNH ĐỌC PDF CHUYÊN NGHIỆP THÍCH ỨNG TRÊN MỌI THIẾT BỊ
+        // ==========================================
+        async function openPdfReader(artId) {
+            const art = articles.find(a => a.id === artId);
+            if (!art) {
+                showToast('Không thể tìm thấy tài liệu này!', 'error');
+                return;
+            }
+
+            currentOpenedArticle = art;
+            
+            // Tăng views trong DB và cập nhật giao diện
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'articles', art.id), {
+                    views: (art.views || 0) + 1
+                });
+            } catch (e) {
+                console.error("View increment failed", e);
+            }
+
+            document.getElementById('reader-doc-title').innerText = art.title;
+            const catObj = categories.find(c => c.id === art.categoryId) || { name: 'Chưa phân loại' };
+            document.getElementById('reader-doc-meta').innerText = `${catObj.name} • Đăng ngày: ${art.uploadDate}`;
+
+            const downloadBtn = document.getElementById('reader-download-btn');
+            downloadBtn.onclick = () => {
+                downloadPdfFile(art.pdfData, art.fileName);
+            };
+
+            currentPdfScale = 1.0; // scale mặc định khớp di động tốt hơn
+            document.getElementById('reader-zoom-percent').innerText = `${Math.round(currentPdfScale * 100)}%`;
+
+            const readerModal = document.getElementById('view-reader');
+            readerModal.classList.remove('hidden');
+            readerModal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+
+            await loadAndRenderPdf(art.pdfData);
+        }
+
+        // Lấy khung chứa canvas và tự scale viewport tối ưu responsive
+        async function renderAllPages() {
+            if (!currentPdfDoc) return;
+            const container = document.getElementById('pdf-pages-container');
+            container.innerHTML = ''; 
+
+            const scrollContainer = document.getElementById('pdf-scroll-container');
+            const availableWidth = scrollContainer.clientWidth - 48; // Padding đệm hông
+
+            for (let pageNum = 1; pageNum <= currentPdfDoc.numPages; pageNum++) {
+                const pageWrapper = document.createElement('div');
+                pageWrapper.id = `page-wrapper-${pageNum}`;
+                pageWrapper.setAttribute('data-page-num', pageNum);
+                pageWrapper.className = 'flex flex-col items-center gap-3 mb-6 bg-slate-900 p-2 sm:p-4 rounded-2xl border border-slate-800 w-full max-w-3xl transition-all duration-300 hover:border-slate-700 pdf-page-shadow';
+                
+                const canvas = document.createElement('canvas');
+                canvas.className = 'w-full max-w-full h-auto bg-white rounded-lg transition-transform duration-300';
+                pageWrapper.appendChild(canvas);
+
+                const pageLabel = document.createElement('div');
+                pageLabel.className = 'text-[10px] text-slate-400 font-bold tracking-widest mt-2 uppercase font-extrabold';
+                pageLabel.innerText = `TRANG ${pageNum} / ${currentPdfDoc.numPages}`;
+                pageWrapper.appendChild(pageLabel);
+
+                container.appendChild(pageWrapper);
+
+                const page = await currentPdfDoc.getPage(pageNum);
+                
+                // Tính toán tỷ lệ rộng để render đúng chuẩn không tràn viền thiết bị
+                const initialViewport = page.getViewport({ scale: 1.0 });
+                const calculatedScale = (availableWidth / initialViewport.width) * currentPdfScale;
+                const viewport = page.getViewport({ scale: Math.min(calculatedScale, 1.5) });
+                
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+
+                await page.render(renderContext).promise;
+            }
+            updateActiveSidebarPage(1);
+        }
+
+        // Gắn sự kiện xử lý resize mượt mà thích ứng
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                if (currentPdfDoc && currentView === 'reader') {
+                    renderAllPages();
+                }
+            }, 300);
+        });
+
+        // ==========================================
+        // EXPOSE CÁC HÀM SANG PHẠM VI WINDOWS ĐỂ INLINE EVENT HANDLER CÓ THỂ GỌI
+        // ==========================================
+        window.reloadPageState = reloadPageState;
+        window.navigateTo = navigateTo;
+        window.handleSearch = handleSearch;
+        window.handleSortChange = handleSortChange;
+        window.selectCategory = selectCategory;
+        window.toggleAuthModal = toggleAuthModal;
+        window.handleAuthSubmit = handleAuthSubmit;
+        window.handleAddCategory = handleAddCategory;
+        window.editCategory = editCategory;
+        window.deleteCategory = deleteCategory;
+        window.openAddArticleModal = openAddArticleModal;
+        window.openEditArticleModal = openEditArticleModal;
+        window.closeArticleModal = closeArticleModal;
+        window.handleArticleSubmit = handleArticleSubmit;
+        window.deleteArticle = deleteArticle;
+        window.openPdfReader = openPdfReader;
+        window.closeReader = closeReader;
+        window.changeZoom = changeZoom;
+        window.printPdfDocument = printPdfDocument;
+        window.togglePrivacyModal = togglePrivacyModal;
+        window.toggleTermsModal = toggleTermsModal;
+        window.toggleReaderSidebar = toggleReaderSidebar;
+        window.scrollToPrevPage = scrollToPrevPage;
+        window.scrollToNextPage = scrollToNextPage;
+        window.jumpToPage = jumpToPage;
+        window.removeUploadedFile = removeUploadedFile;
+        window.closeConfirmModal = closeConfirmModal;
+
+        // Khởi động Auth ban đầu
+        initAuth();
+    </script>
 </body>
 </html>
